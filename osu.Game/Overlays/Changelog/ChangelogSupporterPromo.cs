@@ -1,4 +1,4 @@
-﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
@@ -153,8 +153,8 @@ namespace osu.Game.Overlays.Changelog
                 },
             };
 
-            supportLinkText.AddText("Support further development of osu! and ");
-            supportLinkText.AddLink("become an osu!supporter", @"https://osu.ppy.sh/home/support", t => t.Font = t.Font.With(weight: FontWeight.Bold));
+            supportLinkText.AddText($"Support further development of {OsuBranding.Name} and ");
+            supportLinkText.AddLink($"become a {OsuBranding.Name} supporter", @"https://osu.ppy.sh/home/support", t => t.Font = t.Font.With(weight: FontWeight.Bold));
             supportLinkText.AddText(" today!");
         }
 

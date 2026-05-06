@@ -1,4 +1,4 @@
-﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using osu.Framework.Localisation;
@@ -10,29 +10,29 @@ namespace osu.Game.Localisation
         private const string prefix = @"osu.Game.Resources.Localisation.WindowsAssociationManager";
 
         /// <summary>
-        /// "osu! Beatmap"
+        /// "USO Beatmap"
         /// </summary>
-        public static LocalisableString OsuBeatmap => new TranslatableString(getKey(@"osu_beatmap"), @"osu! Beatmap");
+        public static LocalisableString OsuBeatmap => new TranslatableString(getKey(@"osu_beatmap"), OsuBranding.Name + " Beatmap");
 
         /// <summary>
-        /// "osu! Replay"
+        /// "USO Replay"
         /// </summary>
-        public static LocalisableString OsuReplay => new TranslatableString(getKey(@"osu_replay"), @"osu! Replay");
+        public static LocalisableString OsuReplay => new TranslatableString(getKey(@"osu_replay"), OsuBranding.Name + " Replay");
 
         /// <summary>
-        /// "osu! Skin"
+        /// "USO Skin"
         /// </summary>
-        public static LocalisableString OsuSkin => new TranslatableString(getKey(@"osu_skin"), @"osu! Skin");
+        public static LocalisableString OsuSkin => new TranslatableString(getKey(@"osu_skin"), OsuBranding.Name + " Skin");
 
         /// <summary>
-        /// "osu!"
+        /// "USO"
         /// </summary>
-        public static LocalisableString OsuProtocol => new TranslatableString(getKey(@"osu_protocol"), @"osu!");
+        public static LocalisableString OsuProtocol => new TranslatableString(getKey(@"osu_protocol"), OsuBranding.Name);
 
         /// <summary>
-        /// "osu! Multiplayer"
+        /// "USO Multiplayer"
         /// </summary>
-        public static LocalisableString OsuMultiplayer => new TranslatableString(getKey(@"osu_multiplayer"), @"osu! Multiplayer");
+        public static LocalisableString OsuMultiplayer => new TranslatableString(getKey(@"osu_multiplayer"), OsuBranding.Name + " Multiplayer");
 
         private static string getKey(string key) => $@"{prefix}:{key}";
     }

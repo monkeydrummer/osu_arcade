@@ -1,4 +1,4 @@
-﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Collections.Generic;
@@ -26,7 +26,7 @@ namespace osu.Game.Skinning
         public static SkinInfo CreateInfo() => new SkinInfo
         {
             ID = osu.Game.Skinning.SkinInfo.TRIANGLES_SKIN,
-            Name = "osu! \"triangles\" (2017)",
+            Name = $"{OsuBranding.Name} \"triangles\" (2017)",
             Creator = "team osu!",
             Protected = true,
             InstantiationInfo = typeof(TrianglesSkin).GetInvariantInstantiationInfo()
