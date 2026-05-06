@@ -118,6 +118,18 @@ namespace osu.Game.Screens.Select
 
         protected FilterControl FilterControl { get; private set; } = null!;
 
+        /// <summary>
+        /// Whether the filter / search control in the top-right of song select should be shown.
+        /// Override to <see langword="false"/> to hide it (e.g. in arcade/kiosk mode).
+        /// </summary>
+        protected virtual bool ShowFilterControl => true;
+
+        /// <summary>
+        /// Creates the <see cref="BeatmapDetailsArea"/> instance displayed on the left side of song select.
+        /// Override to supply a custom details area (e.g. to force local-only leaderboard scope in arcade mode).
+        /// </summary>
+        protected virtual BeatmapDetailsArea CreateBeatmapDetailsArea() => new BeatmapDetailsArea();
+
         private BeatmapTitleWedge titleWedge = null!;
         private BeatmapDetailsArea detailsArea = null!;
         private FillFlowContainer wedgesContainer = null!;
@@ -243,7 +255,7 @@ namespace osu.Game.Screens.Select
                                                             {
                                                                 TopPadding = TopPadding,
                                                             }),
-                                                            new ShearAligningWrapper(detailsArea = new BeatmapDetailsArea()),
+                                                            new ShearAligningWrapper(detailsArea = CreateBeatmapDetailsArea()),
                                                         },
                                                     },
                                                 }
@@ -831,7 +843,8 @@ namespace osu.Game.Screens.Select
             {
                 titleWedge.Show();
                 detailsArea.Show();
-                FilterControl.Show();
+                if (ShowFilterControl)
+                    FilterControl.Show();
             }
         }
 

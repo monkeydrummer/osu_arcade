@@ -1,4 +1,4 @@
-﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 #nullable disable
@@ -37,12 +37,18 @@ namespace osu.Game.Screens
 
         protected virtual OsuScreen CreateLoadableScreen() => getIntroSequence();
 
+        /// <summary>
+        /// Creates the <see cref="MainMenu"/> instance to be shown after the intro sequence.
+        /// Override to supply a custom main menu (e.g. for arcade/kiosk mode).
+        /// </summary>
+        protected virtual MainMenu CreateMainMenu() => new MainMenu();
+
         private IntroScreen getIntroSequence()
         {
             // Headless tests run too fast to load non-circles intros correctly.
             // They will hit the "audio can't play" notification and cause random test failures.
             if (SeasonalUIConfig.ENABLED && !DebugUtils.IsNUnitRunning)
-                return new IntroChristmas(createMainMenu);
+                return new IntroChristmas(CreateMainMenu);
 
             if (introSequence == IntroSequence.Random)
                 introSequence = (IntroSequence)RNG.Next(0, (int)IntroSequence.Random);
@@ -50,16 +56,14 @@ namespace osu.Game.Screens
             switch (introSequence)
             {
                 case IntroSequence.Circles:
-                    return new IntroCircles(createMainMenu);
+                    return new IntroCircles(CreateMainMenu);
 
                 case IntroSequence.Welcome:
-                    return new IntroWelcome(createMainMenu);
+                    return new IntroWelcome(CreateMainMenu);
 
                 default:
-                    return new IntroTriangles(createMainMenu);
+                    return new IntroTriangles(CreateMainMenu);
             }
-
-            MainMenu createMainMenu() => new MainMenu();
         }
 
         protected virtual ShaderPrecompiler CreateShaderPrecompiler() => new ShaderPrecompiler();

@@ -138,6 +138,31 @@ namespace osu.Game.Screens.Menu
                 });
             }
 
+            Buttons = CreateButtonSystem();
+            Buttons.OnEditBeatmap = () =>
+            {
+                Beatmap.SetDefault();
+                this.Push(new EditorLoader());
+            };
+            Buttons.OnEditSkin = () => skinEditor?.Show();
+            Buttons.OnSolo = loadSongSelect;
+            Buttons.OnMultiplayer = () => this.Push(new Multiplayer());
+            Buttons.OnQuickPlay = loadQuickPlay;
+            Buttons.OnRankedPlay = loadRankedPlay;
+            Buttons.OnPlaylists = () => this.Push(new Playlists());
+            Buttons.OnDailyChallenge = room =>
+            {
+                if (statics.Get<bool>(Static.DailyChallengeIntroPlayed))
+                    this.Push(new DailyChallenge(room));
+                else
+                    this.Push(new DailyChallengeIntro(room));
+            };
+            Buttons.OnExit = e =>
+            {
+                exitConfirmedViaHoldOrClick = e is MouseEvent;
+                this.Exit();
+            };
+
             AddRangeInternal(new[]
             {
                 SeasonalUIConfig.ENABLED ? new MainMenuSeasonalLighting() : Empty(),
@@ -147,35 +172,7 @@ namespace osu.Game.Screens.Menu
                     ParallaxAmount = 0.01f,
                     Children = new Drawable[]
                     {
-                        Buttons = new ButtonSystem
-                        {
-                            OnEditBeatmap = () =>
-                            {
-                                Beatmap.SetDefault();
-                                this.Push(new EditorLoader());
-                            },
-                            OnEditSkin = () =>
-                            {
-                                skinEditor?.Show();
-                            },
-                            OnSolo = loadSongSelect,
-                            OnMultiplayer = () => this.Push(new Multiplayer()),
-                            OnQuickPlay = loadQuickPlay,
-                            OnRankedPlay = loadRankedPlay,
-                            OnPlaylists = () => this.Push(new Playlists()),
-                            OnDailyChallenge = room =>
-                            {
-                                if (statics.Get<bool>(Static.DailyChallengeIntroPlayed))
-                                    this.Push(new DailyChallenge(room));
-                                else
-                                    this.Push(new DailyChallengeIntro(room));
-                            },
-                            OnExit = e =>
-                            {
-                                exitConfirmedViaHoldOrClick = e is MouseEvent;
-                                this.Exit();
-                            }
-                        }
+                        Buttons
                     }
                 },
                 logoTarget = new Container { RelativeSizeAxes = Axes.Both, },
@@ -462,7 +459,7 @@ namespace osu.Game.Screens.Menu
             Schedule(loadSongSelect);
         }
 
-        public bool OnPressed(KeyBindingPressEvent<GlobalAction> e)
+        public virtual bool OnPressed(KeyBindingPressEvent<GlobalAction> e)
         {
             if (e.Repeat)
                 return false;
@@ -479,9 +476,15 @@ namespace osu.Game.Screens.Menu
             return false;
         }
 
-        public void OnReleased(KeyBindingReleaseEvent<GlobalAction> e)
+        public virtual void OnReleased(KeyBindingReleaseEvent<GlobalAction> e)
         {
         }
+
+        /// <summary>
+        /// Creates the <see cref="ButtonSystem"/> instance used on the main menu.
+        /// Override to supply a custom button system (e.g. for arcade/kiosk mode).
+        /// </summary>
+        protected virtual ButtonSystem CreateButtonSystem() => new ButtonSystem();
 
         private void loadSongSelect() => this.Push(new SoloSongSelect());
 

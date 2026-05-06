@@ -1,9 +1,10 @@
-﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
 using System.IO;
 using System.Runtime.Versioning;
+using osu.Desktop.Arcade;
 using osu.Desktop.LegacyIpc;
 using osu.Desktop.Windows;
 using osu.Framework;
@@ -73,6 +74,9 @@ namespace osu.Desktop
 
             string gameName = base_game_name;
             bool tournamentClient = false;
+            bool arcadeClient = false;
+            bool arcadeDeveloperMode = false;
+            string? arcadeConfigPath = null;
 
             foreach (string arg in args)
             {
@@ -85,6 +89,19 @@ namespace osu.Desktop
                 {
                     case "--tournament":
                         tournamentClient = true;
+                        break;
+
+                    case "--arcade":
+                        arcadeClient = true;
+                        break;
+
+                    case "--arcade_d":
+                        arcadeClient = true;
+                        arcadeDeveloperMode = true;
+                        break;
+
+                    case "--arcade-config":
+                        arcadeConfigPath = val;
                         break;
 
                     case "--debug-client-id":
@@ -136,6 +153,19 @@ namespace osu.Desktop
 
                 if (tournamentClient)
                     host.Run(new TournamentGame());
+                else if (arcadeClient)
+                {
+                    string configPath = arcadeConfigPath ?? ArcadeConfiguration.DefaultConfigPath;
+                    Logger.Log($"[Arcade] Loading arcade configuration from: {configPath}", LoggingTarget.Runtime);
+                    var arcadeConfig = ArcadeConfiguration.LoadFromFile(configPath);
+                    arcadeConfig.IsDeveloperMode = arcadeDeveloperMode;
+                    if (arcadeDeveloperMode)
+                        Logger.Log("[Arcade] Running in developer mode — kiosk UI restrictions are disabled.", LoggingTarget.Runtime);
+                    host.Run(new OsuGameArcade(arcadeConfig, args)
+                    {
+                        IsFirstRun = isFirstRun,
+                    });
+                }
                 else
                 {
                     host.Run(new OsuGameDesktop(args)

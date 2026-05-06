@@ -17,6 +17,13 @@ namespace osu.Game.Screens.Select
         private Header header = null!;
         private Container contentContainer = null!;
 
+        /// <summary>
+        /// When <see langword="true"/>, locks the leaderboard scope to <see cref="BeatmapLeaderboardScope.Local"/>
+        /// and hides the scope dropdown so players cannot switch to an online scope (which would show a
+        /// "please sign in" placeholder when not logged in).
+        /// </summary>
+        public bool ForceLocalScope { get; set; }
+
         public BeatmapDetailsArea()
         {
             RelativeSizeAxes = Axes.X;
@@ -34,6 +41,7 @@ namespace osu.Game.Screens.Select
                     Shear = -OsuGame.SHEAR,
                     RelativeSizeAxes = Axes.X,
                     Height = header_height,
+                    ForceLocalScope = ForceLocalScope,
                 }),
                 new ShearAligningWrapper(contentContainer = new Container
                 {

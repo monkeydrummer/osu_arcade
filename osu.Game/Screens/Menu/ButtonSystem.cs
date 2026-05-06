@@ -1,4 +1,4 @@
-﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
@@ -83,12 +83,14 @@ namespace osu.Game.Screens.Menu
 
         private readonly ButtonArea buttonArea;
 
+        private MainMenuButton? settingsButton;
+
         private readonly MainMenuButton backButton;
 
-        private readonly List<MainMenuButton> buttonsTopLevel = new List<MainMenuButton>();
-        private readonly List<MainMenuButton> buttonsPlay = new List<MainMenuButton>();
-        private readonly List<MainMenuButton> buttonsMulti = new List<MainMenuButton>();
-        private readonly List<MainMenuButton> buttonsEdit = new List<MainMenuButton>();
+        protected readonly List<MainMenuButton> buttonsTopLevel = new List<MainMenuButton>();
+        protected readonly List<MainMenuButton> buttonsPlay = new List<MainMenuButton>();
+        protected readonly List<MainMenuButton> buttonsMulti = new List<MainMenuButton>();
+        protected readonly List<MainMenuButton> buttonsEdit = new List<MainMenuButton>();
 
         private Sample? sampleBackToLogo;
         private Sample? sampleLogoSwoosh;
@@ -109,7 +111,7 @@ namespace osu.Game.Screens.Menu
 
             buttonArea.AddRange(new Drawable[]
             {
-                new MainMenuButton(ButtonSystemStrings.Settings, string.Empty, OsuIcon.Settings, new Color4(85, 85, 85, 255), (_, _) => OnSettings?.Invoke(), Key.O, Key.S)
+                settingsButton = new MainMenuButton(ButtonSystemStrings.Settings, string.Empty, OsuIcon.Settings, new Color4(85, 85, 85, 255), (_, _) => OnSettings?.Invoke(), Key.O, Key.S)
                 {
                     Padding = new MarginPadding { Right = WEDGE_WIDTH },
                 },
@@ -149,6 +151,46 @@ namespace osu.Game.Screens.Menu
         [BackgroundDependencyLoader]
         private void load(AudioManager audio, IdleTracker? idleTracker, GameHost host)
         {
+            PopulateButtons(host);
+
+            if (!ShowSettingsButton)
+                settingsButton?.Expire();
+
+            buttonArea.AddRange(buttonsMulti);
+            buttonArea.AddRange(buttonsPlay);
+            buttonArea.AddRange(buttonsEdit);
+            buttonArea.AddRange(buttonsTopLevel);
+
+            buttonArea.ForEach(b =>
+            {
+                if (b is MainMenuButton)
+                {
+                    b.Origin = Anchor.CentreLeft;
+                    b.Anchor = Anchor.CentreLeft;
+                }
+            });
+
+            isIdle.ValueChanged += idle => updateIdleState(idle.NewValue);
+
+            if (idleTracker != null) isIdle.BindTo(idleTracker.IsIdle);
+
+            sampleBackToLogo = audio.Samples.Get(@"Menu/back-to-logo");
+            sampleLogoSwoosh = audio.Samples.Get(@"Menu/osu-logo-swoosh");
+        }
+
+        /// <summary>
+        /// Whether the Settings button to the left of the logo should be visible.
+        /// Override to <see langword="false"/> to hide it (e.g. in arcade/kiosk mode).
+        /// </summary>
+        protected virtual bool ShowSettingsButton => true;
+
+        /// <summary>
+        /// Populates the button lists (<see cref="buttonsPlay"/>, <see cref="buttonsMulti"/>,
+        /// <see cref="buttonsEdit"/>, <see cref="buttonsTopLevel"/>).
+        /// Override to customise which navigation buttons are shown (e.g. in arcade/kiosk mode).
+        /// </summary>
+        protected virtual void PopulateButtons(GameHost host)
+        {
             buttonsPlay.Add(new MainMenuButton(ButtonSystemStrings.Solo, @"button-default-select", OsuIcon.Player, new Color4(102, 68, 204, 255), (_, _) => OnSolo?.Invoke(), Key.P)
             {
                 Padding = new MarginPadding { Left = WEDGE_WIDTH },
@@ -186,27 +228,6 @@ namespace osu.Game.Screens.Menu
 
             if (host.CanExit)
                 buttonsTopLevel.Add(new MainMenuButton(ButtonSystemStrings.Exit, string.Empty, OsuIcon.CrossCircle, new Color4(238, 51, 153, 255), (_, e) => OnExit?.Invoke(e), Key.Q));
-
-            buttonArea.AddRange(buttonsMulti);
-            buttonArea.AddRange(buttonsPlay);
-            buttonArea.AddRange(buttonsEdit);
-            buttonArea.AddRange(buttonsTopLevel);
-
-            buttonArea.ForEach(b =>
-            {
-                if (b is MainMenuButton)
-                {
-                    b.Origin = Anchor.CentreLeft;
-                    b.Anchor = Anchor.CentreLeft;
-                }
-            });
-
-            isIdle.ValueChanged += idle => updateIdleState(idle.NewValue);
-
-            if (idleTracker != null) isIdle.BindTo(idleTracker.IsIdle);
-
-            sampleBackToLogo = audio.Samples.Get(@"Menu/back-to-logo");
-            sampleLogoSwoosh = audio.Samples.Get(@"Menu/osu-logo-swoosh");
         }
 
         private void onMultiplayer(MainMenuButton mainMenuButton, UIEvent uiEvent)

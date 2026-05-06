@@ -29,6 +29,12 @@ namespace osu.Game.Screens.Select
             private ShearedDropdown<LeaderboardSortMode> sortDropdown = null!;
             private ShearedToggleButton selectedModsToggle = null!;
 
+            /// <summary>
+            /// When <see langword="true"/>, locks the leaderboard scope to <see cref="BeatmapLeaderboardScope.Local"/>
+            /// and hides the scope dropdown so that online scopes (which require login) cannot be selected.
+            /// </summary>
+            public bool ForceLocalScope { get; set; }
+
             public IBindable<Selection> Type => tabControl.Current;
 
             public IBindable<BeatmapLeaderboardScope> Scope => scopeDropdown.Current;
@@ -139,6 +145,14 @@ namespace osu.Game.Screens.Select
                         sortDropdown.Current.Disabled = true;
                     }
                 }, true);
+
+                if (ForceLocalScope)
+                {
+                    // Lock to local scores only — no "please sign in" placeholder can appear.
+                    scopeDropdown.Current.Value = BeatmapLeaderboardScope.Local;
+                    scopeDropdown.Alpha = 0;
+                    scopeDropdown.Current.Disabled = true;
+                }
             }
 
             #region Reading / writing state from / to configuration

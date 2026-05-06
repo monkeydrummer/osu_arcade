@@ -6,6 +6,14 @@
     "osu! Tournament": {
       "commandName": "Project",
       "commandLineArgs": "--tournament"
+    },
+    "osu! Arcade": {
+      "commandName": "Project",
+      "commandLineArgs": "--arcade"
+    },
+    "osu! Arcade Developer": {
+      "commandName": "Project",
+      "commandLineArgs": "--arcade_d"
     }
   }
 }
