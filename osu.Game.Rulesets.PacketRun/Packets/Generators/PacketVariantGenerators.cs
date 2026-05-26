@@ -27,7 +27,6 @@ namespace osu.Game.Rulesets.PacketRun.Packets.Generators
             {
                 Digits = GenerateFromRow(row, length, rng(context)),
                 Variant = Variant,
-                Layout = context.ScrollSpeedTier >= 1.5 ? PacketLayout.Vertical : context.PreferredLayout,
             };
         }
 
@@ -135,7 +134,6 @@ namespace osu.Game.Rulesets.PacketRun.Packets.Generators
             {
                 Digits = digits,
                 Variant = Variant,
-                Layout = context.ScrollSpeedTier >= 1.5 ? PacketLayout.Vertical : context.PreferredLayout,
             };
         }
     }
@@ -173,7 +171,6 @@ namespace osu.Game.Rulesets.PacketRun.Packets.Generators
             {
                 Digits = digits,
                 Variant = Variant,
-                Layout = PacketLayout.Vertical,
             };
         }
     }
@@ -215,7 +212,6 @@ namespace osu.Game.Rulesets.PacketRun.Packets.Generators
             {
                 Digits = digits,
                 Variant = Variant,
-                Layout = inner.Layout,
             };
         }
     }

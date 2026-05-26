@@ -1,8 +1,6 @@
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-using System;
-using osu.Framework.Allocation;
 using osu.Framework.Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
@@ -22,17 +20,19 @@ namespace osu.Game.Rulesets.PacketRun.UI.Components
     {
         public const float DIGIT_SIZE = 36f;
         public const float DIGIT_SPACING = 4f;
-        public const float VERTICAL_STAGGER = 14f;
 
         private readonly PacketHitObject hitObject;
+        private readonly PacketLayout layout;
+
         private readonly Container digitsContainer;
         private int progressIndex;
         private bool active;
         private bool enteredCorrectly = true;
 
-        public DrawablePacket(PacketHitObject hitObject)
+        public DrawablePacket(PacketHitObject hitObject, PacketLayout layout)
         {
             this.hitObject = hitObject;
+            this.layout = layout;
 
             AutoSizeAxes = Axes.Both;
 
@@ -79,9 +79,9 @@ namespace osu.Game.Rulesets.PacketRun.UI.Components
 
         private Vector2 getDigitPosition(int index)
         {
-            if (hitObject.Layout == PacketLayout.Vertical)
+            if (layout == PacketLayout.Vertical)
             {
-                return new Vector2(index * VERTICAL_STAGGER, index * (DIGIT_SIZE + DIGIT_SPACING));
+                return new Vector2(0, index * (DIGIT_SIZE + DIGIT_SPACING));
             }
 
             return new Vector2(index * (DIGIT_SIZE + DIGIT_SPACING), 0);

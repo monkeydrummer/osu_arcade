@@ -40,6 +40,7 @@ namespace osu.Game.Rulesets.PacketRun.Packets
             {
                 BeatmapInfo = new BeatmapInfo { Metadata = metadata },
                 DefaultMode = mode,
+                DefaultLayout = context.PreferredLayout,
             };
 
             foreach (var (timeMs, bpm) in timingPoints)
@@ -64,7 +65,6 @@ namespace osu.Game.Rulesets.PacketRun.Packets
                     StartTime = start + i * beatLength,
                     Digits = generated.Digits,
                     Variant = generated.Variant,
-                    Layout = generated.Layout,
                 });
             }
 

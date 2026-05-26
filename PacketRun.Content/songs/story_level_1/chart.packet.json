@@ -6,6 +6,7 @@
     "audio_file": "neon_stream.ogg",
     "offset_ms": 0,
     "default_mode": "queue",
+    "default_layout": "horizontal",
     "story_chapter": 1,
     "story_level": 1
   },
@@ -13,11 +14,11 @@
     { "time_ms": 0, "bpm": 100.0, "meter": 4 }
   ],
   "sections": [
-    { "start_time_ms": 0, "mode": "queue" }
+    { "start_time_ms": 0, "mode": "queue", "layout": "horizontal" }
   ],
   "packets": [
-    { "time_ms": 2000, "digits": [1, 2, 3], "variant": "ascending", "layout": "horizontal" },
-    { "time_ms": 4000, "digits": [3, 2, 1], "variant": "descending", "layout": "horizontal" },
-    { "time_ms": 6000, "digits": [5, 5, 5], "variant": "repeat", "layout": "horizontal" }
+    { "time_ms": 2000, "digits": [1, 2, 3], "variant": "ascending" },
+    { "time_ms": 4000, "digits": [3, 2, 1], "variant": "descending" },
+    { "time_ms": 6000, "digits": [5, 5, 5], "variant": "repeat" }
   ]
 }

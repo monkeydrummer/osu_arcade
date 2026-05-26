@@ -19,8 +19,6 @@ namespace osu.Game.Rulesets.PacketRun.Objects
 
         public PacketVariant Variant { get; set; } = PacketVariant.Custom;
 
-        public PacketLayout Layout { get; set; } = PacketLayout.Horizontal;
-
         public PacketGameplayMode? ModeOverride { get; set; }
 
         public override Judgement CreateJudgement() => new PacketJudgement();
@@ -37,11 +35,15 @@ namespace osu.Game.Rulesets.PacketRun.Objects
         public double StartTime { get; set; }
 
         public PacketGameplayMode Mode { get; set; }
+
+        public PacketLayout? Layout { get; set; }
     }
 
     public class PacketRunBeatmap : Beatmap<PacketHitObject>
     {
         public PacketGameplayMode DefaultMode { get; set; } = PacketGameplayMode.Queue;
+
+        public PacketLayout DefaultLayout { get; set; } = PacketLayout.Horizontal;
 
         public List<PacketRunModeSection> ModeSections { get; set; } = new List<PacketRunModeSection>();
 
@@ -62,6 +64,28 @@ namespace osu.Game.Rulesets.PacketRun.Objects
             }
 
             return mode;
+        }
+
+        public PacketLayout GetLayoutAt(double time)
+        {
+            PacketLayout layout = DefaultLayout;
+
+            foreach (var section in ModeSections)
+            {
+                if (section.StartTime <= time)
+                {
+                    if (section.Layout.HasValue)
+                    {
+                        layout = section.Layout.Value;
+                    }
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            return layout;
         }
 
         public static PacketRunBeatmap From(IBeatmap beatmap)

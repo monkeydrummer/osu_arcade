@@ -35,7 +35,7 @@ namespace osu.Game.Rulesets.PacketRun.Objects.Drawables
         protected override void LoadComplete()
         {
             base.LoadComplete();
-            AddInternal(packetVisual = new DrawablePacket(HitObject));
+            AddInternal(packetVisual = new DrawablePacket(HitObject, processor.Beatmap.GetLayoutAt(HitObject.StartTime)));
         }
 
         protected override void Update()

@@ -30,6 +30,7 @@ namespace osu.Game.Rulesets.PacketRun.Charts
             {
                 BeatmapInfo = new BeatmapInfo { Metadata = metadata },
                 DefaultMode = parseMode(chart.Metadata.DefaultMode),
+                DefaultLayout = parseLayout(chart.Metadata.DefaultLayout),
             };
 
             beatmap.AudioLeadIn = chart.Metadata.OffsetMs;
@@ -48,6 +49,7 @@ namespace osu.Game.Rulesets.PacketRun.Charts
                 {
                     StartTime = section.StartTimeMs,
                     Mode = parseMode(section.Mode),
+                    Layout = string.IsNullOrEmpty(section.Layout) ? null : parseLayout(section.Layout),
                 });
             }
 
@@ -58,7 +60,6 @@ namespace osu.Game.Rulesets.PacketRun.Charts
                     StartTime = packet.TimeMs,
                     Digits = packet.Digits,
                     Variant = parseVariant(packet.Variant),
-                    Layout = parseLayout(packet.Layout),
                     ModeOverride = string.IsNullOrEmpty(packet.Mode) ? null : parseMode(packet.Mode),
                 });
             }

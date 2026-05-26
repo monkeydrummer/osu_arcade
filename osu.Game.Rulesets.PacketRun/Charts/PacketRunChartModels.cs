@@ -41,6 +41,9 @@ namespace osu.Game.Rulesets.PacketRun.Charts
         [JsonPropertyName("default_mode")]
         public string DefaultMode { get; set; } = "queue";
 
+        [JsonPropertyName("default_layout")]
+        public string DefaultLayout { get; set; } = "horizontal";
+
         [JsonPropertyName("story_chapter")]
         public int? StoryChapter { get; set; }
 
@@ -67,6 +70,9 @@ namespace osu.Game.Rulesets.PacketRun.Charts
 
         [JsonPropertyName("mode")]
         public string Mode { get; set; } = "queue";
+
+        [JsonPropertyName("layout")]
+        public string? Layout { get; set; }
     }
 
     public class PacketRunChartPacket
@@ -79,9 +85,6 @@ namespace osu.Game.Rulesets.PacketRun.Charts
 
         [JsonPropertyName("variant")]
         public string Variant { get; set; } = "custom";
-
-        [JsonPropertyName("layout")]
-        public string Layout { get; set; } = "horizontal";
 
         [JsonPropertyName("mode")]
         public string? Mode { get; set; }

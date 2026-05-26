@@ -10,8 +10,6 @@ namespace osu.Game.Rulesets.PacketRun.Packets
         public int[] Digits { get; init; }
 
         public PacketVariant Variant { get; init; }
-
-        public PacketLayout Layout { get; init; }
     }
 
     public interface IPacketVariantGenerator

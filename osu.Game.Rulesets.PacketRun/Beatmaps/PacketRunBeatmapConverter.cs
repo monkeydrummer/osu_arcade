@@ -30,10 +30,12 @@ namespace osu.Game.Rulesets.PacketRun.Beatmaps
             if (original is PacketRunBeatmap source && converted is PacketRunBeatmap target)
             {
                 target.DefaultMode = source.DefaultMode;
+                target.DefaultLayout = source.DefaultLayout;
                 target.ModeSections = source.ModeSections.Select(section => new PacketRunModeSection
                 {
                     StartTime = section.StartTime,
                     Mode = section.Mode,
+                    Layout = section.Layout,
                 }).ToList();
             }
 
