@@ -925,6 +925,8 @@ namespace osu.Game
 
         protected virtual Loader CreateLoader() => new Loader();
 
+        protected virtual BackgroundDataStoreProcessor CreateBackgroundDataStoreProcessor() => new BackgroundDataStoreProcessor();
+
         protected virtual UpdateManager CreateUpdateManager() => new UpdateManager();
 
         /// <summary>
@@ -1237,7 +1239,7 @@ namespace osu.Game
             loadComponentSingleFile<IDialogOverlay>(new DialogOverlay(), topMostOverlayContent.Add, true);
             loadComponentSingleFile(new MedalOverlay(), topMostOverlayContent.Add);
 
-            loadComponentSingleFile(new BackgroundDataStoreProcessor(), Add);
+            loadComponentSingleFile(CreateBackgroundDataStoreProcessor(), Add);
             loadComponentSingleFile<BeatmapStore>(detachedBeatmapStore = new RealmDetachedBeatmapStore(), Add, true);
             loadComponentSingleFile(new QueueController(), Add, true);
 

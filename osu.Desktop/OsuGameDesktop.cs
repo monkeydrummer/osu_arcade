@@ -26,7 +26,7 @@ using osu.Game.Utils;
 
 namespace osu.Desktop
 {
-    internal partial class OsuGameDesktop : OsuGame
+    internal partial class OsuGameDesktop : PacketRunGame
     {
         private OsuSchemeLinkIPCChannel? osuSchemeLinkIPCChannel;
         private ArchiveImportIPCChannel? archiveImportIPCChannel;

@@ -12,7 +12,6 @@ using osu.Framework.Logging;
 using osu.Framework.Platform;
 using osu.Game;
 using osu.Game.IPC;
-using osu.Game.Tournament;
 using SDL;
 using Velopack;
 
@@ -72,7 +71,6 @@ namespace osu.Desktop
             string cwd = Environment.CurrentDirectory;
 
             string gameName = base_game_name;
-            bool tournamentClient = false;
 
             foreach (string arg in args)
             {
@@ -83,10 +81,6 @@ namespace osu.Desktop
 
                 switch (key)
                 {
-                    case "--tournament":
-                        tournamentClient = true;
-                        break;
-
                     case "--debug-client-id":
                         if (!DebugUtils.IsDebugBuild)
                             throw new InvalidOperationException("Cannot use this argument in a non-debug build.");
@@ -101,7 +95,7 @@ namespace osu.Desktop
 
             var hostOptions = new HostOptions
             {
-                IPCPipeName = !tournamentClient ? OsuGame.IPC_PIPE_NAME : null,
+                IPCPipeName = OsuGame.IPC_PIPE_NAME,
                 FriendlyGameName = OsuGameBase.GAME_NAME,
             };
 
@@ -134,16 +128,11 @@ namespace osu.Desktop
                     }
                 }
 
-                if (tournamentClient)
-                    host.Run(new TournamentGame());
-                else
+                host.Run(new OsuGameDesktop(args)
                 {
-                    host.Run(new OsuGameDesktop(args)
-                    {
-                        IsFirstRun = isFirstRun,
-                        EnableWebSocketServer = Environment.GetEnvironmentVariable("OSU_WEBSOCKET_SERVER") == "1",
-                    });
-                }
+                    IsFirstRun = isFirstRun,
+                    EnableWebSocketServer = Environment.GetEnvironmentVariable("OSU_WEBSOCKET_SERVER") == "1",
+                });
             }
         }
 

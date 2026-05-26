@@ -1,0 +1,23 @@
+{
+  "format_version": 1,
+  "metadata": {
+    "title": "Neon Stream",
+    "artist": "Packet Run",
+    "audio_file": "neon_stream.ogg",
+    "offset_ms": 0,
+    "default_mode": "queue"
+  },
+  "timing": [
+    { "time_ms": 0, "bpm": 128.0, "meter": 4 }
+  ],
+  "sections": [
+    { "start_time_ms": 0, "mode": "queue" }
+  ],
+  "packets": [
+    { "time_ms": 1500, "digits": [3, 2, 1], "variant": "descending", "layout": "horizontal" },
+    { "time_ms": 2500, "digits": [4, 5, 6], "variant": "ascending", "layout": "horizontal" },
+    { "time_ms": 3500, "digits": [9, 8, 9], "variant": "oreo", "layout": "horizontal" },
+    { "time_ms": 4500, "digits": [1, 1, 1], "variant": "repeat", "layout": "horizontal" },
+    { "time_ms": 5500, "digits": [7, 4, 1], "variant": "columnDesc", "layout": "vertical" }
+  ]
+}
