@@ -78,10 +78,14 @@ namespace osu.Game.Rulesets.PacketRun.Screens
 
             foreach (var song in songLibrary.Songs)
             {
-                flow.Add(new PacketRunMenuButton($"{song.Title} — {song.Artist}", () => selectedSong.Value = song)
+                var captured = song;
+                var button = new PacketRunMenuButton($"{captured.Title} — {captured.Artist}", () => selectedSong.Value = captured)
                 {
                     Size = new Vector2(420, 40),
-                });
+                };
+
+                selectedSong.BindValueChanged(e => button.Selected = e.NewValue == captured, true);
+                flow.Add(button);
             }
 
             return flow;
@@ -110,7 +114,7 @@ namespace osu.Game.Rulesets.PacketRun.Screens
 
         private void addModToggle(FillFlowContainer flow, string label, PacketModFlags flag)
         {
-            flow.Add(new PacketRunMenuButton(label, () =>
+            var button = new PacketRunMenuButton(label, () =>
             {
                 if ((selectedMods.Value & flag) != 0)
                 {
@@ -123,15 +127,24 @@ namespace osu.Game.Rulesets.PacketRun.Screens
             })
             {
                 Size = new Vector2(420, 36),
-            });
+            };
+
+            selectedMods.BindValueChanged(e => button.Selected = (e.NewValue & flag) != 0, true);
+            flow.Add(button);
         }
 
         private void addModToggle(FillFlowContainer flow, string label, PacketGameplayMode mode, bool isMode)
         {
-            flow.Add(new PacketRunMenuButton(label, () => selectedMode.Value = mode)
+            var button = new PacketRunMenuButton(label, () =>
+            {
+                selectedMode.Value = selectedMode.Value == mode ? PacketGameplayMode.Queue : mode;
+            })
             {
                 Size = new Vector2(420, 36),
-            });
+            };
+
+            selectedMode.BindValueChanged(e => button.Selected = e.NewValue == mode, true);
+            flow.Add(button);
         }
 
         private void startRandom(AudioManager audio)

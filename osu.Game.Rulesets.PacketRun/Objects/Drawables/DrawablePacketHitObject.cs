@@ -67,6 +67,13 @@ namespace osu.Game.Rulesets.PacketRun.Objects.Drawables
 
         protected override void CheckForResult(bool userTriggered, double timeOffset)
         {
+            var mode = HitObject.ModeOverride ?? processor.CurrentMode.Value;
+
+            if (mode == PacketGameplayMode.Queue)
+            {
+                return;
+            }
+
             if (!userTriggered && timeOffset > (HitObject.HitWindows?.WindowFor(HitResult.Miss) ?? 200))
             {
                 ApplyMinResult();

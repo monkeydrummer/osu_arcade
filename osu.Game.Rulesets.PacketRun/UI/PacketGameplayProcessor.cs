@@ -21,6 +21,7 @@ namespace osu.Game.Rulesets.PacketRun.UI
         private int progressIndex;
         private bool packetEnteredCorrectly = true;
         private int rhythmMissesInPacket;
+        private HitResult? rhythmFirstDigitResult;
 
         public PacketRunBeatmap Beatmap { get; }
 
@@ -79,15 +80,7 @@ namespace osu.Game.Rulesets.PacketRun.UI
                     return;
                 }
 
-                activePacket.ApplyCustomResult(result);
-            }
-            else if (mode == PacketGameplayMode.Queue && progressIndex == 0)
-            {
-                activePacket.ApplyCustomResult(HitResult.Great);
-            }
-            else
-            {
-                activePacket.ApplyCustomResult(HitResult.Great);
+                rhythmFirstDigitResult = result;
             }
 
             progressIndex++;
@@ -115,7 +108,6 @@ namespace osu.Game.Rulesets.PacketRun.UI
             }
 
             rhythmMissesInPacket++;
-            activePacket?.ApplyCustomResult(HitResult.Miss);
             progressIndex++;
 
             if (progressIndex >= activePacket!.HitObject.Digits.Length)
@@ -130,6 +122,12 @@ namespace osu.Game.Rulesets.PacketRun.UI
 
         private void completeActivePacket()
         {
+            if (activePacket != null && !activePacket.Result.HasResult)
+            {
+                var mode = activePacket.HitObject.ModeOverride ?? CurrentMode.Value;
+                activePacket.ApplyCustomResult(getFinalResult(mode));
+            }
+
             if (packetEnteredCorrectly && rhythmMissesInPacket == 0)
             {
                 ScoreProcessor?.RegisterSignal(true);
@@ -140,8 +138,24 @@ namespace osu.Game.Rulesets.PacketRun.UI
             progressIndex = 0;
             packetEnteredCorrectly = true;
             rhythmMissesInPacket = 0;
+            rhythmFirstDigitResult = null;
             ActivePacketChanged?.Invoke();
             tryActivateNext();
+        }
+
+        private HitResult getFinalResult(PacketGameplayMode mode)
+        {
+            if (mode == PacketGameplayMode.Rhythm)
+            {
+                if (rhythmMissesInPacket > 0 || rhythmFirstDigitResult == HitResult.Miss)
+                {
+                    return HitResult.Miss;
+                }
+
+                return rhythmFirstDigitResult ?? HitResult.Great;
+            }
+
+            return packetEnteredCorrectly ? HitResult.Great : HitResult.Ok;
         }
 
         private void tryActivateNext()
@@ -164,6 +178,7 @@ namespace osu.Game.Rulesets.PacketRun.UI
                 progressIndex = 0;
                 packetEnteredCorrectly = true;
                 rhythmMissesInPacket = 0;
+                rhythmFirstDigitResult = null;
                 next.SetActive(true, progressIndex);
                 ActivePacketChanged?.Invoke();
                 return;
@@ -173,5 +188,18 @@ namespace osu.Game.Rulesets.PacketRun.UI
         public DrawablePacketHitObject? Active => activePacket;
 
         public IEnumerable<DrawablePacketHitObject> QueuedPackets => waitingPackets;
+
+        public IReadOnlyList<DrawablePacketHitObject> GetOrderedQueue()
+        {
+            var queue = new List<DrawablePacketHitObject>();
+
+            if (activePacket != null)
+            {
+                queue.Add(activePacket);
+            }
+
+            queue.AddRange(waitingPackets);
+            return queue;
+        }
     }
 }

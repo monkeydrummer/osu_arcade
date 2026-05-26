@@ -5,6 +5,9 @@ using osu.Framework.Allocation;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
+using osu.Framework.Input.Bindings;
+using osu.Framework.Input.Events;
+using osu.Game.Rulesets.PacketRun;
 using osu.Game.Rulesets.UI.Scrolling;
 using osuTK;
 using osuTK.Graphics;
@@ -12,9 +15,29 @@ using osuTK.Graphics;
 namespace osu.Game.Rulesets.PacketRun.UI
 {
     [Cached]
-    public partial class PacketRunPlayfield : ScrollingPlayfield
+    public partial class PacketRunPlayfield : ScrollingPlayfield, IKeyBindingHandler<PacketRunAction>
     {
+        [Resolved]
+        private PacketGameplayProcessor processor { get; set; } = null!;
+
         protected override ScrollingHitObjectContainer CreateScrollingHitObjectContainer() => new PacketRunHitObjectContainer();
+
+        public bool OnPressed(KeyBindingPressEvent<PacketRunAction> e)
+        {
+            int digit = (int)e.Action;
+
+            if (digit is < 0 or > 9)
+            {
+                return false;
+            }
+
+            processor.HandleDigitInput(digit, Time.Current);
+            return true;
+        }
+
+        public void OnReleased(KeyBindingReleaseEvent<PacketRunAction> e)
+        {
+        }
 
         [BackgroundDependencyLoader]
         private void load()

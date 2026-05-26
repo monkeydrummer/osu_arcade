@@ -4,8 +4,6 @@
 using System.Collections.Generic;
 using osu.Framework.Allocation;
 using osu.Framework.Input;
-using osu.Framework.Input.Bindings;
-using osu.Framework.Input.Events;
 using osu.Game.Beatmaps;
 using osu.Game.Input.Handlers;
 using osu.Game.Replays;
@@ -22,7 +20,7 @@ using osu.Game.Rulesets.UI.Scrolling;
 namespace osu.Game.Rulesets.PacketRun.UI
 {
     [Cached]
-    public partial class DrawablePacketRunRuleset : DrawableScrollingRuleset<PacketHitObject>, IKeyBindingHandler<PacketRunAction>
+    public partial class DrawablePacketRunRuleset : DrawableScrollingRuleset<PacketHitObject>
     {
         [Cached]
         public PacketGameplayProcessor Processor { get; private set; } = null!;
@@ -61,22 +59,5 @@ namespace osu.Game.Rulesets.PacketRun.UI
         public override DrawableHitObject<PacketHitObject> CreateDrawableRepresentation(PacketHitObject h) => new DrawablePacketHitObject(h);
 
         protected override PassThroughInputManager CreateInputManager() => new PacketRunInputManager(Ruleset?.RulesetInfo, Variant);
-
-        public bool OnPressed(KeyBindingPressEvent<PacketRunAction> e)
-        {
-            int? digit = KeyBindingInputManager.ActionToDigit(e.Action);
-
-            if (!digit.HasValue)
-            {
-                return false;
-            }
-
-            Processor.HandleDigitInput(digit.Value, Clock.CurrentTime);
-            return true;
-        }
-
-        public void OnReleased(KeyBindingReleaseEvent<PacketRunAction> e)
-        {
-        }
     }
 }

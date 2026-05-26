@@ -54,19 +54,35 @@ namespace osu.Game.Rulesets.PacketRun
             }
         }
 
-        public override IEnumerable<KeyBinding> GetDefaultKeyBindings(int variant = 0) => new[]
+        public override IEnumerable<KeyBinding> GetDefaultKeyBindings(int variant = 0)
         {
-            new KeyBinding(InputKey.Keypad0, PacketRunAction.Key0),
-            new KeyBinding(InputKey.Keypad1, PacketRunAction.Key1),
-            new KeyBinding(InputKey.Keypad2, PacketRunAction.Key2),
-            new KeyBinding(InputKey.Keypad3, PacketRunAction.Key3),
-            new KeyBinding(InputKey.Keypad4, PacketRunAction.Key4),
-            new KeyBinding(InputKey.Keypad5, PacketRunAction.Key5),
-            new KeyBinding(InputKey.Keypad6, PacketRunAction.Key6),
-            new KeyBinding(InputKey.Keypad7, PacketRunAction.Key7),
-            new KeyBinding(InputKey.Keypad8, PacketRunAction.Key8),
-            new KeyBinding(InputKey.Keypad9, PacketRunAction.Key9),
-        };
+            foreach (var action in new[]
+                     {
+                         (InputKey.Keypad0, PacketRunAction.Key0),
+                         (InputKey.Keypad1, PacketRunAction.Key1),
+                         (InputKey.Keypad2, PacketRunAction.Key2),
+                         (InputKey.Keypad3, PacketRunAction.Key3),
+                         (InputKey.Keypad4, PacketRunAction.Key4),
+                         (InputKey.Keypad5, PacketRunAction.Key5),
+                         (InputKey.Keypad6, PacketRunAction.Key6),
+                         (InputKey.Keypad7, PacketRunAction.Key7),
+                         (InputKey.Keypad8, PacketRunAction.Key8),
+                         (InputKey.Keypad9, PacketRunAction.Key9),
+                         (InputKey.Number0, PacketRunAction.Key0),
+                         (InputKey.Number1, PacketRunAction.Key1),
+                         (InputKey.Number2, PacketRunAction.Key2),
+                         (InputKey.Number3, PacketRunAction.Key3),
+                         (InputKey.Number4, PacketRunAction.Key4),
+                         (InputKey.Number5, PacketRunAction.Key5),
+                         (InputKey.Number6, PacketRunAction.Key6),
+                         (InputKey.Number7, PacketRunAction.Key7),
+                         (InputKey.Number8, PacketRunAction.Key8),
+                         (InputKey.Number9, PacketRunAction.Key9),
+                     })
+            {
+                yield return new KeyBinding(action.Item1, action.Item2);
+            }
+        }
 
         public override Drawable CreateIcon() => new OsuSpriteText
         {
