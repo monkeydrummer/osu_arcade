@@ -8,7 +8,6 @@ using osu.Framework.Graphics;
 using osu.Game.Rulesets.PacketRun.Objects;
 using osu.Game.Rulesets.PacketRun.Objects.Drawables;
 using osu.Game.Rulesets.UI.Scrolling;
-using osuTK;
 
 namespace osu.Game.Rulesets.PacketRun.UI
 {
@@ -51,7 +50,9 @@ namespace osu.Game.Rulesets.PacketRun.UI
 
                 if (visibleIndices.TryGetValue(drawable, out int index))
                 {
-                    drawable.Position = new Vector2(DrawWidth * queue_x, DrawHeight * queue_base_y + index * queue_spacing);
+                    float x = DrawWidth * queue_x;
+                    float y = DrawHeight * queue_base_y + index * queue_spacing;
+                    drawable.UpdateQueueLayout(x, y, index);
                     drawable.Alpha = 1;
                 }
                 else

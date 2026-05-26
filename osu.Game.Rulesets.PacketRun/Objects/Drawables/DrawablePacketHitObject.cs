@@ -1,8 +1,11 @@
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using System.Linq;
 using osu.Framework.Allocation;
+using osu.Framework.Extensions;
 using osu.Framework.Graphics;
+using osu.Framework.Graphics.Transforms;
 using osu.Game.Rulesets.Judgements;
 using osu.Game.Rulesets.Objects.Drawables;
 using osu.Game.Rulesets.PacketRun.Objects;
@@ -17,8 +20,11 @@ namespace osu.Game.Rulesets.PacketRun.Objects.Drawables
         [Resolved]
         private PacketGameplayProcessor processor { get; set; } = null!;
 
+        private const double queue_slide_duration = 80;
+
         private DrawablePacket? packetVisual;
         private bool registered;
+        private int queueSlot = -1;
 
         public DrawablePacketHitObject(PacketHitObject hitObject)
             : base(hitObject)
@@ -64,6 +70,29 @@ namespace osu.Game.Rulesets.PacketRun.Objects.Drawables
         }
 
         public void FlashWrong() => packetVisual?.FlashWrong();
+
+        public void UpdateQueueLayout(float x, float targetY, int index)
+        {
+            X = x;
+
+            if (queueSlot != index)
+            {
+                if (queueSlot < 0)
+                {
+                    Y = targetY;
+                }
+                else
+                {
+                    this.MoveToY(targetY, queue_slide_duration, Easing.OutCubic);
+                }
+
+                queueSlot = index;
+            }
+            else if (!Transforms.Any())
+            {
+                Y = targetY;
+            }
+        }
 
         protected override void CheckForResult(bool userTriggered, double timeOffset)
         {
