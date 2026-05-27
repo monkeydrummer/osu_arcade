@@ -7,6 +7,7 @@ using osu.Framework.Allocation;
 using osu.Framework.Graphics;
 using osu.Game.Rulesets.PacketRun.Objects;
 using osu.Game.Rulesets.PacketRun.Objects.Drawables;
+using osu.Game.Rulesets.PacketRun.UI.Components;
 using osu.Game.Rulesets.UI.Scrolling;
 
 namespace osu.Game.Rulesets.PacketRun.UI
@@ -26,6 +27,8 @@ namespace osu.Game.Rulesets.PacketRun.UI
         {
             base.UpdateAfterChildrenLife();
 
+            processor.UpdateRhythmVisuals(Time.Current);
+
             var visibleQueue = processor.GetOrderedQueue().Take(max_visible_queue_depth).ToList();
             var visibleIndices = new Dictionary<DrawablePacketHitObject, int>(visibleQueue.Count);
 
@@ -43,6 +46,14 @@ namespace osu.Game.Rulesets.PacketRun.UI
 
                 var mode = drawable.HitObject.ModeOverride ?? processor.CurrentMode.Value;
 
+                if (mode == PacketGameplayMode.Rhythm)
+                {
+                    applyRhythmScrollPosition(drawable, out bool visible);
+                    drawable.Y = DrawHeight / 2f;
+                    drawable.Alpha = visible ? 1 : 0;
+                    continue;
+                }
+
                 if (mode != PacketGameplayMode.Queue)
                 {
                     continue;
@@ -59,6 +70,38 @@ namespace osu.Game.Rulesets.PacketRun.UI
                 {
                     drawable.Alpha = 0;
                 }
+            }
+        }
+
+        private void applyRhythmScrollPosition(DrawablePacketHitObject drawable, out bool visible)
+        {
+            double timeToHit = drawable.HitObject.StartTime - Time.Current;
+            float spawnX = DrawWidth * PacketRunRhythmLayout.SpawnX;
+            float visualHitX = DrawWidth * PacketRunRhythmLayout.HitLineX;
+            // Packet visuals are top-left anchored on the hit object origin, so offset the scroll target
+            // left by half a digit width so the first digit centers on the hit line at StartTime.
+            float hitX = visualHitX - DrawablePacket.DIGIT_SIZE / 2f;
+            float travel = spawnX - hitX;
+            double approachDuration = PacketRunRhythmLayout.ApproachDuration;
+
+            if (timeToHit > approachDuration)
+            {
+                drawable.X = spawnX;
+                visible = false;
+                return;
+            }
+
+            visible = true;
+
+            if (timeToHit > 0)
+            {
+                float progress = 1f - (float)(timeToHit / approachDuration);
+                drawable.X = spawnX - travel * progress;
+            }
+            else
+            {
+                float progress = (float)(-timeToHit / approachDuration);
+                drawable.X = hitX - travel * progress;
             }
         }
     }

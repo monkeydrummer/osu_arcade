@@ -8,7 +8,7 @@ namespace osu.Game.Rulesets.PacketRun.Scoring
     public partial class PacketRunHealthProcessor : DrainingHealthProcessor
     {
         public PacketRunHealthProcessor(double drainStartTime)
-            : base(drainStartTime)
+            : base(drainStartTime, drainLenience: 0.75)
         {
         }
     }

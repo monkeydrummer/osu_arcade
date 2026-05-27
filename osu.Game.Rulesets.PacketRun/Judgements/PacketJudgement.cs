@@ -11,5 +11,28 @@ namespace osu.Game.Rulesets.PacketRun.Judgements
         public override HitResult MaxResult => HitResult.Perfect;
 
         public override HitResult MinResult => HitResult.Miss;
+
+        protected override double HealthIncreaseFor(HitResult result)
+        {
+            switch (result)
+            {
+                case HitResult.Miss:
+                    return -0.008;
+
+                case HitResult.Meh:
+                case HitResult.Ok:
+                    return 0.008;
+
+                case HitResult.Good:
+                    return 0.014;
+
+                case HitResult.Great:
+                case HitResult.Perfect:
+                    return 0.018;
+
+                default:
+                    return base.HealthIncreaseFor(result);
+            }
+        }
     }
 }

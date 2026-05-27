@@ -15,10 +15,10 @@
     { "start_time_ms": 0, "mode": "queue", "layout": "horizontal" }
   ],
   "packets": [
-    { "time_ms": 1500, "digits": [3, 2, 1], "variant": "descending" },
-    { "time_ms": 2500, "digits": [4, 5, 6], "variant": "ascending" },
-    { "time_ms": 3500, "digits": [9, 8, 9], "variant": "oreo" },
-    { "time_ms": 4500, "digits": [1, 1, 1], "variant": "repeat" },
-    { "time_ms": 5500, "digits": [7, 4, 1], "variant": "columnDesc" }
+    { "time_ms": 2000, "digits": [3, 2, 1], "variant": "descending" },
+    { "time_ms": 4500, "digits": [4, 5, 6], "variant": "ascending" },
+    { "time_ms": 7000, "digits": [9, 8, 9], "variant": "oreo" },
+    { "time_ms": 9500, "digits": [1, 1, 1], "variant": "repeat" },
+    { "time_ms": 12000, "digits": [7, 4, 1], "variant": "columnDesc" }
   ]
 }

@@ -18,6 +18,7 @@ using osu.Framework.Threading;
 using osu.Game.Configuration;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
+using osu.Game.Overlays;
 using osu.Game.Overlays.Settings.Sections;
 using osu.Game.Overlays.Settings.Sections.Audio;
 using osu.Game.Rulesets.PacketRun;
@@ -30,6 +31,9 @@ namespace osu.Game.Rulesets.PacketRun.Screens.Settings
     public partial class PacketRunSettingsScreen : PacketRunScreen
     {
         public override string Title => "Settings";
+
+        [Cached]
+        private OverlayColourProvider colourProvider = new OverlayColourProvider(OverlayColourScheme.Purple);
 
         private readonly Bindable<string> activeSection = new Bindable<string>("audio");
 

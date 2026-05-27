@@ -20,6 +20,7 @@ namespace osu.Game.Rulesets.PacketRun.UI.Components
     {
         public const float DIGIT_SIZE = 36f;
         public const float DIGIT_SPACING = 4f;
+        public const float VERTICAL_STAGGER = 14f;
 
         private readonly PacketHitObject hitObject;
         private readonly PacketLayout layout;
@@ -81,7 +82,7 @@ namespace osu.Game.Rulesets.PacketRun.UI.Components
         {
             if (layout == PacketLayout.Vertical)
             {
-                return new Vector2(0, index * (DIGIT_SIZE + DIGIT_SPACING));
+                return new Vector2(index * VERTICAL_STAGGER, index * (DIGIT_SIZE + DIGIT_SPACING));
             }
 
             return new Vector2(index * (DIGIT_SIZE + DIGIT_SPACING), 0);

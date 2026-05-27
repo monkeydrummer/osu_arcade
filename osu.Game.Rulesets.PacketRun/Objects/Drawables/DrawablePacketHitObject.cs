@@ -42,10 +42,18 @@ namespace osu.Game.Rulesets.PacketRun.Objects.Drawables
         {
             base.Update();
 
-            if (!registered && Time.Current >= HitObject.StartTime - 100)
+            if (!registered)
             {
-                registered = true;
-                processor.RegisterPacket(this);
+                var mode = HitObject.ModeOverride ?? processor.Beatmap.GetModeAt(HitObject.StartTime);
+                double registrationLead = mode == PacketGameplayMode.Rhythm
+                    ? HitObject.HitWindows?.WindowFor(HitResult.Miss) ?? 188
+                    : 100;
+
+                if (Time.Current >= HitObject.StartTime - registrationLead)
+                {
+                    registered = true;
+                    processor.RegisterPacket(this);
+                }
             }
         }
 
@@ -105,7 +113,7 @@ namespace osu.Game.Rulesets.PacketRun.Objects.Drawables
 
             if (!userTriggered && timeOffset > (HitObject.HitWindows?.WindowFor(HitResult.Miss) ?? 200))
             {
-                ApplyMinResult();
+                processor.NotifyRhythmExpired(this);
             }
         }
 

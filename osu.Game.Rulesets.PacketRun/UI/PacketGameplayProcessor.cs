@@ -16,12 +16,19 @@ namespace osu.Game.Rulesets.PacketRun.UI
 {
     public class PacketGameplayProcessor
     {
+        private sealed class RhythmPacketState
+        {
+            public int ProgressIndex;
+            public bool EnteredCorrectly = true;
+            public int MissesInPacket;
+            public HitResult? FirstDigitResult;
+        }
+
         private readonly Queue<DrawablePacketHitObject> waitingPackets = new Queue<DrawablePacketHitObject>();
+        private readonly Dictionary<DrawablePacketHitObject, RhythmPacketState> rhythmPackets = new Dictionary<DrawablePacketHitObject, RhythmPacketState>();
         private DrawablePacketHitObject? activePacket;
         private int progressIndex;
         private bool packetEnteredCorrectly = true;
-        private int rhythmMissesInPacket;
-        private HitResult? rhythmFirstDigitResult;
 
         public PacketRunBeatmap Beatmap { get; }
 
@@ -38,8 +45,17 @@ namespace osu.Game.Rulesets.PacketRun.UI
 
         public void RegisterPacket(DrawablePacketHitObject drawable)
         {
-            waitingPackets.Enqueue(drawable);
-            tryActivateNext();
+            var mode = drawable.HitObject.ModeOverride ?? Beatmap.GetModeAt(drawable.HitObject.StartTime);
+
+            if (mode == PacketGameplayMode.Queue)
+            {
+                waitingPackets.Enqueue(drawable);
+                tryActivateNext();
+            }
+            else
+            {
+                rhythmPackets[drawable] = new RhythmPacketState();
+            }
         }
 
         public void UpdateMode(double currentTime)
@@ -47,30 +63,120 @@ namespace osu.Game.Rulesets.PacketRun.UI
             CurrentMode.Value = Beatmap.GetModeAt(currentTime);
         }
 
+        public void UpdateRhythmVisuals(double currentTime)
+        {
+            foreach (var (drawable, state) in rhythmPackets)
+            {
+                if (!drawable.IsAlive)
+                {
+                    continue;
+                }
+
+                bool inWindow = isRhythmInputWindow(drawable, state, currentTime);
+                drawable.SetActive(inWindow, state.ProgressIndex);
+            }
+        }
+
+        public void NotifyRhythmExpired(DrawablePacketHitObject drawable)
+        {
+            if (!rhythmPackets.Remove(drawable))
+            {
+                return;
+            }
+
+            drawable.SetActive(false, 0);
+
+            if (!drawable.Result.HasResult)
+            {
+                drawable.ApplyCustomResult(HitResult.Miss);
+            }
+
+            drawable.MarkComplete();
+        }
+
         public void HandleDigitInput(int digit, double currentTime)
         {
+            if (tryGetRhythmTarget(currentTime, out var rhythmTarget, out var rhythmState))
+            {
+                handleRhythmDigit(rhythmTarget, rhythmState, digit, currentTime);
+                return;
+            }
+
             if (activePacket == null)
             {
                 return;
             }
 
-            var hitObject = activePacket.HitObject;
-            var mode = hitObject.ModeOverride ?? CurrentMode.Value;
+            handleQueueDigit(activePacket, ref progressIndex, ref packetEnteredCorrectly, digit, currentTime);
+        }
 
-            if (progressIndex >= hitObject.Digits.Length)
+        private void handleQueueDigit(
+            DrawablePacketHitObject target,
+            ref int targetProgress,
+            ref bool enteredCorrectly,
+            int digit,
+            double currentTime)
+        {
+            var hitObject = target.HitObject;
+
+            if (targetProgress >= hitObject.Digits.Length)
             {
                 return;
             }
 
-            int expected = hitObject.Digits[progressIndex];
+            int expected = hitObject.Digits[targetProgress];
 
             if (digit != expected)
             {
-                handleWrongDigit(mode);
+                handleWrongDigit(target, ref enteredCorrectly);
                 return;
             }
 
-            if (mode == PacketGameplayMode.Rhythm && progressIndex == 0)
+            targetProgress++;
+
+            if (targetProgress >= hitObject.Digits.Length)
+            {
+                completeQueuePacket(enteredCorrectly);
+            }
+            else
+            {
+                target.RefreshProgress(targetProgress, enteredCorrectly);
+            }
+        }
+
+        private void handleRhythmDigit(DrawablePacketHitObject target, RhythmPacketState state, int digit, double currentTime)
+        {
+            var hitObject = target.HitObject;
+
+            if (state.ProgressIndex >= hitObject.Digits.Length)
+            {
+                return;
+            }
+
+            int expected = hitObject.Digits[state.ProgressIndex];
+
+            if (digit != expected)
+            {
+                ScoreProcessor?.RegisterHeat();
+                ScoreProcessor?.RegisterSignal(false);
+                state.EnteredCorrectly = false;
+                target.FlashWrong();
+                state.MissesInPacket++;
+                state.ProgressIndex++;
+
+                if (state.ProgressIndex >= hitObject.Digits.Length)
+                {
+                    completeRhythmPacket(target, state);
+                }
+                else
+                {
+                    target.RefreshProgress(state.ProgressIndex, state.EnteredCorrectly);
+                }
+
+                return;
+            }
+
+            if (state.ProgressIndex == 0)
             {
                 double timeOffset = currentTime - hitObject.StartTime;
                 var result = hitObject.HitWindows?.ResultFor(timeOffset) ?? HitResult.Miss;
@@ -80,55 +186,37 @@ namespace osu.Game.Rulesets.PacketRun.UI
                     return;
                 }
 
-                rhythmFirstDigitResult = result;
+                state.FirstDigitResult = result;
             }
 
-            progressIndex++;
+            state.ProgressIndex++;
 
-            if (progressIndex >= hitObject.Digits.Length)
+            if (state.ProgressIndex >= hitObject.Digits.Length)
             {
-                completeActivePacket();
+                completeRhythmPacket(target, state);
             }
             else
             {
-                activePacket.RefreshProgress(progressIndex, packetEnteredCorrectly);
+                target.RefreshProgress(state.ProgressIndex, state.EnteredCorrectly);
             }
         }
 
-        private void handleWrongDigit(PacketGameplayMode mode)
+        private void handleWrongDigit(DrawablePacketHitObject target, ref bool enteredCorrectly)
         {
             ScoreProcessor?.RegisterHeat();
             ScoreProcessor?.RegisterSignal(false);
-            packetEnteredCorrectly = false;
-            activePacket?.FlashWrong();
-
-            if (mode == PacketGameplayMode.Queue)
-            {
-                return;
-            }
-
-            rhythmMissesInPacket++;
-            progressIndex++;
-
-            if (progressIndex >= activePacket!.HitObject.Digits.Length)
-            {
-                completeActivePacket();
-            }
-            else
-            {
-                activePacket.RefreshProgress(progressIndex, packetEnteredCorrectly);
-            }
+            enteredCorrectly = false;
+            target.FlashWrong();
         }
 
-        private void completeActivePacket()
+        private void completeQueuePacket(bool enteredCorrectly)
         {
             if (activePacket != null && !activePacket.Result.HasResult)
             {
-                var mode = activePacket.HitObject.ModeOverride ?? CurrentMode.Value;
-                activePacket.ApplyCustomResult(getFinalResult(mode));
+                activePacket.ApplyCustomResult(enteredCorrectly ? HitResult.Great : HitResult.Ok);
             }
 
-            if (packetEnteredCorrectly && rhythmMissesInPacket == 0)
+            if (enteredCorrectly)
             {
                 ScoreProcessor?.RegisterSignal(true);
             }
@@ -137,25 +225,50 @@ namespace osu.Game.Rulesets.PacketRun.UI
             activePacket = null;
             progressIndex = 0;
             packetEnteredCorrectly = true;
-            rhythmMissesInPacket = 0;
-            rhythmFirstDigitResult = null;
             ActivePacketChanged?.Invoke();
             tryActivateNext();
         }
 
-        private HitResult getFinalResult(PacketGameplayMode mode)
+        private void completeRhythmPacket(DrawablePacketHitObject drawable, RhythmPacketState state)
+        {
+            if (!drawable.Result.HasResult)
+            {
+                drawable.ApplyCustomResult(getFinalResult(PacketGameplayMode.Rhythm, state.MissesInPacket, state.FirstDigitResult, state.EnteredCorrectly));
+            }
+
+            if (state.EnteredCorrectly && state.MissesInPacket == 0)
+            {
+                ScoreProcessor?.RegisterSignal(true);
+            }
+
+            rhythmPackets.Remove(drawable);
+            drawable.SetActive(false, state.ProgressIndex);
+            drawable.MarkComplete();
+        }
+
+        private HitResult getFinalResult(PacketGameplayMode mode, int missesInPacket, HitResult? firstDigitResult, bool enteredCorrectly)
         {
             if (mode == PacketGameplayMode.Rhythm)
             {
-                if (rhythmMissesInPacket > 0 || rhythmFirstDigitResult == HitResult.Miss)
+                if (firstDigitResult == HitResult.Miss)
                 {
                     return HitResult.Miss;
                 }
 
-                return rhythmFirstDigitResult ?? HitResult.Great;
+                if (missesInPacket >= PacketRunGameplayConstants.MaxWrongDigitsBeforePacketMiss)
+                {
+                    return HitResult.Miss;
+                }
+
+                if (missesInPacket > 0)
+                {
+                    return HitResult.Ok;
+                }
+
+                return firstDigitResult ?? HitResult.Great;
             }
 
-            return packetEnteredCorrectly ? HitResult.Great : HitResult.Ok;
+            return enteredCorrectly ? HitResult.Great : HitResult.Ok;
         }
 
         private void tryActivateNext()
@@ -177,12 +290,72 @@ namespace osu.Game.Rulesets.PacketRun.UI
                 activePacket = next;
                 progressIndex = 0;
                 packetEnteredCorrectly = true;
-                rhythmMissesInPacket = 0;
-                rhythmFirstDigitResult = null;
                 next.SetActive(true, progressIndex);
                 ActivePacketChanged?.Invoke();
                 return;
             }
+        }
+
+        private bool tryGetRhythmTarget(double currentTime, out DrawablePacketHitObject target, out RhythmPacketState state)
+        {
+            target = null!;
+            state = null!;
+
+            DrawablePacketHitObject? best = null;
+            RhythmPacketState? bestState = null;
+            double bestDelta = double.MaxValue;
+
+            foreach (var pair in rhythmPackets)
+            {
+                var drawable = pair.Key;
+                var packetState = pair.Value;
+
+                if (!drawable.IsAlive || drawable.Result.HasResult)
+                {
+                    continue;
+                }
+
+                if (!isRhythmInputWindow(drawable, packetState, currentTime))
+                {
+                    continue;
+                }
+
+                double delta = Math.Abs(currentTime - drawable.HitObject.StartTime);
+
+                if (delta < bestDelta)
+                {
+                    bestDelta = delta;
+                    best = drawable;
+                    bestState = packetState;
+                }
+            }
+
+            if (best == null || bestState == null)
+            {
+                return false;
+            }
+
+            target = best;
+            state = bestState;
+            return true;
+        }
+
+        private static bool isRhythmInputWindow(DrawablePacketHitObject drawable, RhythmPacketState state, double currentTime)
+        {
+            if (state.ProgressIndex >= drawable.HitObject.Digits.Length)
+            {
+                return false;
+            }
+
+            double timeOffset = currentTime - drawable.HitObject.StartTime;
+            double missWindow = drawable.HitObject.HitWindows?.WindowFor(HitResult.Miss) ?? 188;
+
+            if (state.ProgressIndex == 0)
+            {
+                return Math.Abs(timeOffset) <= missWindow;
+            }
+
+            return timeOffset <= missWindow * 4;
         }
 
         public DrawablePacketHitObject? Active => activePacket;

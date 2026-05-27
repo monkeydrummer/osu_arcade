@@ -27,12 +27,16 @@ namespace osu.Game.Rulesets.PacketRun.UI
 
         public new PacketRunInputManager KeyBindingInputManager => (PacketRunInputManager)base.KeyBindingInputManager;
 
+        private const double queue_time_range = 4000;
+
         public DrawablePacketRunRuleset(PacketRunRuleset ruleset, IBeatmap beatmap, IReadOnlyList<Mod>? mods)
             : base(ruleset, beatmap, mods)
         {
             Direction.Value = ScrollingDirection.Left;
-            TimeRange.Value = 4000;
             Processor = new PacketGameplayProcessor(PacketRunBeatmap.From(Beatmap));
+            TimeRange.Value = Processor.Beatmap.DefaultMode == PacketGameplayMode.Rhythm
+                ? PacketRunRhythmLayout.TimeRange
+                : queue_time_range;
         }
 
         [BackgroundDependencyLoader]
@@ -50,6 +54,10 @@ namespace osu.Game.Rulesets.PacketRun.UI
         {
             base.Update();
             Processor.UpdateMode(Clock.CurrentTime);
+
+            TimeRange.Value = Processor.CurrentMode.Value == PacketGameplayMode.Rhythm
+                ? PacketRunRhythmLayout.TimeRange
+                : queue_time_range;
         }
 
         protected override Playfield CreatePlayfield() => new PacketRunPlayfield();

@@ -8,8 +8,8 @@ using osu.Game.Beatmaps.ControlPoints;
 using osu.Game.Rulesets.Judgements;
 using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.PacketRun.Judgements;
-using osu.Game.Rulesets.PacketRun.Objects;
 using osu.Game.Rulesets.PacketRun.Scoring;
+using osu.Game.Rulesets.Scoring;
 
 namespace osu.Game.Rulesets.PacketRun.Objects
 {
@@ -23,11 +23,7 @@ namespace osu.Game.Rulesets.PacketRun.Objects
 
         public override Judgement CreateJudgement() => new PacketJudgement();
 
-        protected override void ApplyDefaultsToSelf(ControlPointInfo controlPointInfo, IBeatmapDifficultyInfo difficulty)
-        {
-            base.ApplyDefaultsToSelf(controlPointInfo, difficulty);
-            HitWindows = new PacketRunHitWindows();
-        }
+        protected override HitWindows CreateHitWindows() => new PacketRunHitWindows();
     }
 
     public class PacketRunModeSection

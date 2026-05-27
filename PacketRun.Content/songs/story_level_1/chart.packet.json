@@ -17,8 +17,8 @@
     { "start_time_ms": 0, "mode": "queue", "layout": "horizontal" }
   ],
   "packets": [
-    { "time_ms": 2000, "digits": [1, 2, 3], "variant": "ascending" },
-    { "time_ms": 4000, "digits": [3, 2, 1], "variant": "descending" },
-    { "time_ms": 6000, "digits": [5, 5, 5], "variant": "repeat" }
+    { "time_ms": 2500, "digits": [1, 2, 3], "variant": "ascending" },
+    { "time_ms": 5500, "digits": [3, 2, 1], "variant": "descending" },
+    { "time_ms": 8500, "digits": [5, 5, 5], "variant": "repeat" }
   ]
 }

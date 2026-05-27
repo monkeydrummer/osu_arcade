@@ -55,6 +55,7 @@ namespace osu.Game.Rulesets.PacketRun.Packets
 
             double beatLength = beatmap.ControlPointInfo.TimingPoints.First().BeatLength;
             double start = beatLength * 4;
+            double spacing = mode == PacketGameplayMode.Rhythm ? beatLength * 2 : beatLength;
 
             for (int i = 0; i < packetCount; i++)
             {
@@ -62,7 +63,7 @@ namespace osu.Game.Rulesets.PacketRun.Packets
 
                 beatmap.HitObjects.Add(new PacketHitObject
                 {
-                    StartTime = start + i * beatLength,
+                    StartTime = start + i * spacing,
                     Digits = generated.Digits,
                     Variant = generated.Variant,
                 });

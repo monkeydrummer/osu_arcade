@@ -8,8 +8,8 @@ using osu.Framework.Graphics.Shapes;
 using osu.Framework.Input.Bindings;
 using osu.Framework.Input.Events;
 using osu.Game.Rulesets.PacketRun;
+using osu.Game.Rulesets.PacketRun.UI.Components;
 using osu.Game.Rulesets.UI.Scrolling;
-using osuTK;
 using osuTK.Graphics;
 
 namespace osu.Game.Rulesets.PacketRun.UI
@@ -17,6 +17,8 @@ namespace osu.Game.Rulesets.PacketRun.UI
     [Cached]
     public partial class PacketRunPlayfield : ScrollingPlayfield, IKeyBindingHandler<PacketRunAction>
     {
+        public const float HitLineX = PacketRunRhythmLayout.HitLineX;
+
         [Resolved]
         private PacketGameplayProcessor processor { get; set; } = null!;
 
@@ -51,12 +53,12 @@ namespace osu.Game.Rulesets.PacketRun.UI
 
             AddInternal(new GridBackground { Depth = 1 });
 
-            AddInternal(new HitLine
+            AddInternal(new HitLine(DrawablePacket.DIGIT_SIZE)
             {
-                Anchor = Anchor.CentreLeft,
-                Origin = Anchor.CentreLeft,
+                Origin = Anchor.Centre,
                 RelativePositionAxes = Axes.Both,
-                X = 0.12f,
+                X = HitLineX,
+                Y = 0.5f,
                 Depth = 0,
             });
 
@@ -98,20 +100,56 @@ namespace osu.Game.Rulesets.PacketRun.UI
 
     public partial class HitLine : CompositeDrawable
     {
-        public HitLine()
+        private const float border_thickness = 2f;
+
+        public HitLine(float width)
         {
-            Width = 3;
+            Width = width;
             RelativeSizeAxes = Axes.Y;
-            Height = 0.6f;
+            Height = 1f;
         }
 
         [BackgroundDependencyLoader]
         private void load()
         {
-            InternalChild = new Box
+            var colour = new Color4(255, 80, 180, 255);
+
+            InternalChildren = new Drawable[]
             {
-                RelativeSizeAxes = Axes.Both,
-                Colour = new Color4(255, 80, 180, 255),
+                new Box
+                {
+                    RelativeSizeAxes = Axes.Both,
+                    Colour = colour,
+                    Alpha = 0.12f,
+                },
+                new Box
+                {
+                    RelativeSizeAxes = Axes.X,
+                    Height = border_thickness,
+                    Colour = colour,
+                },
+                new Box
+                {
+                    Anchor = Anchor.BottomLeft,
+                    Origin = Anchor.BottomLeft,
+                    RelativeSizeAxes = Axes.X,
+                    Height = border_thickness,
+                    Colour = colour,
+                },
+                new Box
+                {
+                    RelativeSizeAxes = Axes.Y,
+                    Width = border_thickness,
+                    Colour = colour,
+                },
+                new Box
+                {
+                    Anchor = Anchor.TopRight,
+                    Origin = Anchor.TopRight,
+                    RelativeSizeAxes = Axes.Y,
+                    Width = border_thickness,
+                    Colour = colour,
+                },
             };
         }
     }
