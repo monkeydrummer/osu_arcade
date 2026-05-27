@@ -3,6 +3,7 @@
 
 using osu.Framework.Allocation;
 using osu.Framework.Platform;
+using osu.Framework.Screens;
 using osu.Game;
 using osu.Game.Database;
 using osu.Game.Rulesets.PacketRun.Database;
@@ -50,5 +51,27 @@ namespace osu.Desktop
         protected override Loader CreateLoader() => new PacketRunLoader();
 
         protected override BackgroundDataStoreProcessor CreateBackgroundDataStoreProcessor() => new PacketRunBackgroundDataStoreProcessor();
+
+        protected override void LoadComplete()
+        {
+            base.LoadComplete();
+
+            Toolbar.OnHome = () =>
+            {
+                CloseAllOverlays(false);
+                PerformFromScreen(_ => { }, new[] { typeof(PacketRunMainMenu) });
+            };
+        }
+
+        public override void AttemptExit()
+        {
+            PerformFromScreen(menu => menu.Exit(), new[] { typeof(PacketRunMainMenu) });
+        }
+
+        protected override void ScreenChanged(IOsuScreen? current, IOsuScreen? newScreen)
+        {
+            base.ScreenChanged(current, newScreen);
+            Toolbar.Hide();
+        }
     }
 }

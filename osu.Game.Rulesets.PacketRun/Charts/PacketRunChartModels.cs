@@ -61,6 +61,9 @@ namespace osu.Game.Rulesets.PacketRun.Charts
 
         [JsonPropertyName("meter")]
         public int Meter { get; set; } = 4;
+
+        [JsonPropertyName("meter_denominator")]
+        public int MeterDenominator { get; set; } = 4;
     }
 
     public class PacketRunChartSection

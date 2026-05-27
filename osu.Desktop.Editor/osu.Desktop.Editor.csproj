@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup Label="Project">
+    <TargetFramework>net8.0</TargetFramework>
+    <OutputType>WinExe</OutputType>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Description>Packet Run Beatmap Editor.</Description>
+    <AssemblyName>PacketRunEditor</AssemblyName>
+    <AssemblyTitle>Packet Run Editor</AssemblyTitle>
+    <Title>Packet Run Editor</Title>
+    <EnableWindowsLongPathAware>true</EnableWindowsLongPathAware>
+    <ApplicationIcon>..\osu.Desktop\lazer.ico</ApplicationIcon>
+    <Version>0.0.0</Version>
+    <FileVersion>0.0.0</FileVersion>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>osu.Desktop.Editor.Program</StartupObject>
+  </PropertyGroup>
+  <ItemGroup Label="Project References">
+    <ProjectReference Include="..\osu.Game\osu.Game.csproj" />
+    <ProjectReference Include="..\osu.Game.Rulesets.PacketRun\osu.Game.Rulesets.PacketRun.csproj" />
+  </ItemGroup>
+  <ItemGroup Label="Package References">
+    <PackageReference Include="System.IO.Packaging" Version="10.0.5" />
+    <PackageReference Include="Velopack" Version="0.0.1298" />
+  </ItemGroup>
+  <ItemGroup Label="Resources">
+    <EmbeddedResource Include="..\osu.Desktop\lazer.ico" Link="lazer.ico" />
+  </ItemGroup>
+  <ItemGroup Label="Windows Icons">
+    <Content Include="..\osu.Desktop\*.ico" Link="%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+  <ItemGroup Label="Content">
+    <Content Include="..\PacketRun.Content\**\*" Link="PacketRun.Content\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

@@ -5,6 +5,7 @@ using System.Linq;
 using osu.Framework.Allocation;
 using osu.Framework.Screens;
 using osu.Game.Beatmaps;
+using osu.Game.Overlays;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.PacketRun.Charts;
 using osu.Game.Screens;
@@ -14,7 +15,11 @@ namespace osu.Game.Rulesets.PacketRun.Screens
 {
     public abstract partial class PacketRunScreen : OsuScreen
     {
-        public override bool ShowFooter => true;
+        public override bool ShowFooter => false;
+
+        public override bool HideOverlaysOnEnter => true;
+
+        protected override OverlayActivation InitialOverlayActivationMode => OverlayActivation.Disabled;
 
         public override bool AllowUserExit => true;
 
@@ -27,7 +32,7 @@ namespace osu.Game.Rulesets.PacketRun.Screens
             Ruleset.Value = rulesets.GetRuleset(PacketRunRuleset.SHORT_NAME)
                             ?? rulesets.AvailableRulesets.First();
 
-            this.Push(new PlayerLoader(() => new PacketRunSoloPlayer()));
+            this.Push(new PacketRunPlayerLoader(() => new PacketRunSoloPlayer()));
         }
 
         protected static string GetContentRoot()

@@ -19,7 +19,13 @@ namespace osu.Game.Rulesets.PacketRun.Screens
         protected override ResultsScreen CreateResults(ScoreInfo score)
         {
             persistLocalScore(score);
-            return base.CreateResults(score);
+
+            return new PacketRunResultsScreen(score)
+            {
+                AllowRetry = true,
+                AllowWatchingReplay = false,
+                IsLocalPlay = true,
+            };
         }
 
         private void persistLocalScore(ScoreInfo score)

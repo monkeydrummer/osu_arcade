@@ -79,6 +79,11 @@ namespace osu.Game.Screens.Ranking
         public bool AllowWatchingReplay { get; init; } = true;
 
         /// <summary>
+        /// Whether the collections management button is shown on the results footer.
+        /// </summary>
+        protected virtual bool ShowCollectionButton => true;
+
+        /// <summary>
         /// Whether the provided score is for a local user's play.
         /// This will trigger elements like the user's ranking to display.
         /// </summary>
@@ -228,7 +233,7 @@ namespace osu.Game.Screens.Ranking
                 });
             }
 
-            if (Score?.BeatmapInfo != null)
+            if (ShowCollectionButton && Score?.BeatmapInfo != null)
                 buttons.Add(new CollectionButton(Score.BeatmapInfo));
 
             if (Score?.BeatmapInfo?.BeatmapSet != null && Score.BeatmapInfo.BeatmapSet.OnlineID > 0)

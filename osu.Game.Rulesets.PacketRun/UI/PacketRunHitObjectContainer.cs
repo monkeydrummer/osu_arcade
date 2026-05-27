@@ -16,7 +16,9 @@ namespace osu.Game.Rulesets.PacketRun.UI
     public partial class PacketRunHitObjectContainer : ScrollingHitObjectContainer
     {
         private const int max_visible_queue_depth = 5;
-        private const float queue_spacing = 46f;
+
+        /// <summary>Vertical spacing between stacked queue packets (shared with the chart editor).</summary>
+        public const float QUEUE_STACK_SPACING = 46f;
         private const float queue_x = 0.72f;
         private const float queue_base_y = 0.30f;
 
@@ -62,7 +64,7 @@ namespace osu.Game.Rulesets.PacketRun.UI
                 if (visibleIndices.TryGetValue(drawable, out int index))
                 {
                     float x = DrawWidth * queue_x;
-                    float y = DrawHeight * queue_base_y + index * queue_spacing;
+                    float y = DrawHeight * queue_base_y + index * QUEUE_STACK_SPACING;
                     drawable.UpdateQueueLayout(x, y, index);
                     drawable.Alpha = 1;
                 }

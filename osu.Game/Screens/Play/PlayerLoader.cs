@@ -53,6 +53,11 @@ namespace osu.Game.Screens.Play
 
         protected virtual double PlayerPushDelay => 1800 + disclaimers.Count * 500;
 
+        /// <summary>
+        /// Whether audio/visual/input settings are shown on the right during load.
+        /// </summary>
+        protected virtual bool ShowSideSettings => true;
+
         public override bool HideOverlaysOnEnter => hideOverlays;
 
         public override bool DisallowExternalBeatmapRulesetChanges => true;
@@ -600,8 +605,11 @@ namespace osu.Game.Screens.Play
 
                 using (BeginDelayedSequence(delayBeforeSideDisplays))
                 {
-                    sideContent.FadeInFromZero(500, Easing.Out)
-                               .MoveToX(0, 500, Easing.OutQuint);
+                    if (ShowSideSettings)
+                    {
+                        sideContent.FadeInFromZero(500, Easing.Out)
+                                   .MoveToX(0, 500, Easing.OutQuint);
+                    }
 
                     disclaimers.FadeInFromZero(500, Easing.Out)
                                .MoveToX(0, 500, Easing.OutQuint);
