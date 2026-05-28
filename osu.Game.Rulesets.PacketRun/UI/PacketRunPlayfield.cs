@@ -7,8 +7,13 @@ using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Input.Bindings;
 using osu.Framework.Input.Events;
+using osu.Game.Rulesets.Judgements;
+using osu.Game.Rulesets.Objects.Drawables;
 using osu.Game.Rulesets.PacketRun;
+using osu.Game.Rulesets.PacketRun.BeatGrid;
 using osu.Game.Rulesets.PacketRun.UI.Components;
+using osu.Game.Rulesets.Scoring;
+using osu.Game.Rulesets.UI;
 using osu.Game.Rulesets.UI.Scrolling;
 using osuTK.Graphics;
 
@@ -21,6 +26,10 @@ namespace osu.Game.Rulesets.PacketRun.UI
 
         [Resolved]
         private PacketGameplayProcessor processor { get; set; } = null!;
+
+        private readonly JudgementContainer<DrawablePacketRunJudgement> judgementLayer;
+        private readonly JudgementPooler<DrawablePacketRunJudgement> judgementPooler;
+        private readonly Container judgementAboveHitObjectLayer;
 
         protected override ScrollingHitObjectContainer CreateScrollingHitObjectContainer() => new PacketRunHitObjectContainer();
 
@@ -41,6 +50,28 @@ namespace osu.Game.Rulesets.PacketRun.UI
         {
         }
 
+        public PacketRunPlayfield()
+        {
+            InternalChildren = new Drawable[]
+            {
+                HitObjectContainer,
+                judgementLayer = new JudgementContainer<DrawablePacketRunJudgement> { RelativeSizeAxes = Axes.Both },
+                judgementAboveHitObjectLayer = new Container { RelativeSizeAxes = Axes.Both },
+            };
+
+            AddInternal(judgementPooler = new JudgementPooler<DrawablePacketRunJudgement>(new[]
+            {
+                HitResult.Perfect,
+                HitResult.Great,
+                HitResult.Good,
+                HitResult.Ok,
+                HitResult.Meh,
+                HitResult.Miss,
+            }, onJudgementLoaded));
+
+            NewResult += onNewResult;
+        }
+
         [BackgroundDependencyLoader]
         private void load()
         {
@@ -51,7 +82,13 @@ namespace osu.Game.Rulesets.PacketRun.UI
                 Depth = float.MaxValue,
             });
 
-            AddInternal(new GridBackground { Depth = 1 });
+            AddInternal(new GridBackground { Depth = 2 });
+
+            AddInternal(new RhythmBeatGridOverlay(new PacketRunBeatGrid(processor.Beatmap))
+            {
+                RelativeSizeAxes = Axes.Both,
+                Depth = 1,
+            });
 
             AddInternal(new HitLine(DrawablePacket.DIGIT_SIZE)
             {
@@ -61,11 +98,29 @@ namespace osu.Game.Rulesets.PacketRun.UI
                 Y = 0.5f,
                 Depth = 0,
             });
+        }
 
-            AddRangeInternal(new Drawable[]
+        private void onJudgementLoaded(DrawablePacketRunJudgement judgement)
+        {
+            judgementAboveHitObjectLayer.Add(judgement.ProxiedAboveHitObjectsContent);
+        }
+
+        private void onNewResult(DrawableHitObject judgedObject, JudgementResult result)
+        {
+            if (!judgedObject.DisplayResult || !DisplayJudgements.Value)
             {
-                HitObjectContainer,
-            });
+                return;
+            }
+
+            var explosion = judgementPooler.Get(result.Type, doj => doj.Apply(result, judgedObject));
+
+            if (explosion == null)
+            {
+                return;
+            }
+
+            judgementLayer.Add(explosion);
+            judgementAboveHitObjectLayer.ChangeChildDepth(explosion.ProxiedAboveHitObjectsContent, (float)-result.TimeAbsolute);
         }
     }
 

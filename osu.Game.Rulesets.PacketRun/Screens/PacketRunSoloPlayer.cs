@@ -16,6 +16,19 @@ namespace osu.Game.Rulesets.PacketRun.Screens
         [Resolved]
         private PacketRunSaveStore saveStore { get; set; } = null!;
 
+        protected override void LoadComplete()
+        {
+            base.LoadComplete();
+
+            ScoreProcessor.HasCompleted.BindValueChanged(completed =>
+            {
+                if (completed.NewValue)
+                {
+                    GameplayClockContainer.Stop();
+                }
+            });
+        }
+
         protected override ResultsScreen CreateResults(ScoreInfo score)
         {
             persistLocalScore(score);

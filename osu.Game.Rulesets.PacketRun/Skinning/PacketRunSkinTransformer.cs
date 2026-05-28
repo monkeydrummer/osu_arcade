@@ -3,6 +3,8 @@
 
 using osu.Framework.Graphics;
 using osu.Game.Rulesets.PacketRun.Skinning.HUD;
+using osu.Game.Rulesets.PacketRun.UI.Components;
+using osu.Game.Rulesets.Scoring;
 using osu.Game.Skinning;
 
 namespace osu.Game.Rulesets.PacketRun.Skinning
@@ -18,8 +20,23 @@ namespace osu.Game.Rulesets.PacketRun.Skinning
         {
             switch (lookup)
             {
-                case GlobalSkinnableContainerLookup global when global.Lookup == GlobalSkinnableContainers.MainHUDComponents:
-                    return new PacketRunHudOverlay();
+                case GlobalSkinnableContainerLookup containerLookup:
+                    // Only replace the ruleset-specific HUD container (see HUDOverlay.rulesetComponents).
+                    if (containerLookup.Ruleset == null)
+                    {
+                        return base.GetDrawableComponent(lookup);
+                    }
+
+                    switch (containerLookup.Lookup)
+                    {
+                        case GlobalSkinnableContainers.MainHUDComponents:
+                            return new PacketRunHudOverlay();
+                    }
+
+                    break;
+
+                case SkinComponentLookup<HitResult> resultComponent:
+                    return new PacketRunJudgementPiece(resultComponent.Component);
             }
 
             return base.GetDrawableComponent(lookup);

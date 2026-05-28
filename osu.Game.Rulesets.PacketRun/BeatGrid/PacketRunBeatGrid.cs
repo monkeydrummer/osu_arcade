@@ -3,9 +3,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using osu.Game.Rulesets.PacketRun.Charts;
+using osu.Game.Rulesets.PacketRun.Objects;
 
-namespace osu.Game.Rulesets.PacketRun.Editor
+namespace osu.Game.Rulesets.PacketRun.BeatGrid
 {
     public class PacketRunBeatGrid
     {
@@ -22,6 +24,16 @@ namespace osu.Game.Rulesets.PacketRun.Editor
             timingStartMs = timing.TimeMs;
             bpm = timing.Bpm > 0 ? timing.Bpm : 120;
             meter = timing.Meter > 0 ? timing.Meter : 4;
+            beatIntervalMs = 60000.0 / bpm;
+        }
+
+        public PacketRunBeatGrid(PacketRunBeatmap beatmap)
+        {
+            offsetMs = beatmap.AudioLeadIn;
+            var timing = beatmap.ControlPointInfo.TimingPoints.FirstOrDefault();
+            timingStartMs = timing?.Time ?? 0;
+            bpm = timing != null && timing.BeatLength > 0 ? 60000 / timing.BeatLength : 120;
+            meter = timing?.TimeSignature.Numerator ?? 4;
             beatIntervalMs = 60000.0 / bpm;
         }
 

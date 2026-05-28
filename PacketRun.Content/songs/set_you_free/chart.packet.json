@@ -1,0 +1,18 @@
+{
+  "format_version": 1,
+  "metadata": {
+    "title": "Set You Free",
+    "artist": "",
+    "audio_file": "set_you_free.mp3",
+    "offset_ms": 15,
+    "default_mode": "queue",
+    "default_layout": "horizontal"
+  },
+  "timing": [
+    { "time_ms": 0, "bpm": 125.0, "meter": 4 }
+  ],
+  "sections": [
+    { "start_time_ms": 0, "mode": "queue", "layout": "horizontal" }
+  ],
+  "packets": []
+}

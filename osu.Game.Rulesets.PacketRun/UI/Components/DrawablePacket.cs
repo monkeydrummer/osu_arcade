@@ -59,6 +59,17 @@ namespace osu.Game.Rulesets.PacketRun.UI.Components
         public void FlashWrong()
         {
             this.FlashColour(Color4.Red, 200);
+            this.ScaleTo(1.08f).ScaleTo(1, 150, Easing.Out);
+        }
+
+        public void FlashCorrectDigit(int digitIndex)
+        {
+            if (digitIndex < 0 || digitIndex >= digitsContainer.Count)
+            {
+                return;
+            }
+
+            digitsContainer[digitIndex].FlashColour(new Color4(80, 255, 120, 255), 150);
         }
 
         private void rebuild()

@@ -25,8 +25,8 @@ namespace osu.Game.Rulesets.PacketRun.Screens
         public override string Title => "Random Arcade";
 
         private readonly Bindable<PacketRunSongEntry?> selectedSong = new Bindable<PacketRunSongEntry?>();
-        private readonly Bindable<PacketModFlags> selectedMods = new Bindable<PacketModFlags>(PacketModFlags.AllStandard);
-        private readonly Bindable<PacketGameplayMode> selectedMode = new Bindable<PacketGameplayMode>(PacketGameplayMode.Queue);
+        private readonly Bindable<PacketModFlags> selectedMods = new Bindable<PacketModFlags>(PacketModFlags.Descending | PacketModFlags.Ascending);
+        private readonly Bindable<PacketGameplayMode> selectedMode = new Bindable<PacketGameplayMode>(PacketGameplayMode.Rhythm);
 
         private PacketRunSongLibrary songLibrary = null!;
         private FillFlowContainer modContainer = null!;
@@ -166,7 +166,15 @@ namespace osu.Game.Rulesets.PacketRun.Screens
             var timing = chart.Timing.Select(t => (t.TimeMs, t.Bpm));
             int seed = System.Environment.TickCount;
 
-            var beatmap = generator.Generate(metadata, timing, selectedMods.Value, selectedMode.Value, packetCount: 48, seed: seed);
+            double songLengthMs = PacketRunWorkingBeatmap.GetAudioLengthMs(
+                selectedSong.Value.Directory,
+                chart.Metadata.AudioFile,
+                audio,
+                selectedSong.Value.ChartPath);
+
+            int packetCount = PacketRunBeatmapGenerator.CalculatePacketCountForSongLength(songLengthMs, timing, selectedMode.Value);
+
+            var beatmap = generator.Generate(metadata, timing, selectedMods.Value, selectedMode.Value, packetCount: packetCount, seed: seed);
 
             var working = new PacketRunWorkingBeatmap(beatmap, selectedSong.Value.Directory, chart.Metadata.AudioFile, audio);
             StartGameplay(working);

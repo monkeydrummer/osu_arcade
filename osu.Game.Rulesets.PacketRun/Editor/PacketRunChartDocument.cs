@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using osu.Game.Rulesets.PacketRun.BeatGrid;
 using osu.Game.Rulesets.PacketRun.Charts;
 using osu.Game.Rulesets.PacketRun.Objects;
 

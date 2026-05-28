@@ -132,15 +132,8 @@ namespace osu.Game.Rulesets.PacketRun.Charts
 
 
 
-        public override IBeatmap GetPlayableBeatmap(IRulesetInfo ruleset, IReadOnlyList<Mod> mods, CancellationToken token)
-
-        {
-
-            token.ThrowIfCancellationRequested();
-
-            return beatmap;
-
-        }
+        public override IBeatmap GetPlayableBeatmap(IRulesetInfo ruleset, IReadOnlyList<Mod> mods, CancellationToken token) =>
+            base.GetPlayableBeatmap(ruleset, mods, token);
 
 
 
@@ -213,6 +206,21 @@ namespace osu.Game.Rulesets.PacketRun.Charts
         }
 
 
+
+        public static double GetAudioLengthMs(string songDirectory, string audioFileName, AudioManager audioManager, string? chartFilePath = null)
+        {
+            var beatmap = new PacketRunBeatmap
+            {
+                BeatmapInfo = new BeatmapInfo
+                {
+                    Metadata = new BeatmapMetadata { AudioFile = audioFileName },
+                },
+            };
+
+            var working = new PacketRunWorkingBeatmap(beatmap, songDirectory, audioFileName, audioManager, chartFilePath);
+            working.LoadTrack();
+            return working.Track.Length;
+        }
 
         private Track? loadTrackFromFile(string path)
 

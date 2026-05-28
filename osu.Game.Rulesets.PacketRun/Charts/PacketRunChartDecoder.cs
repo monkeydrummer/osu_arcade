@@ -6,6 +6,7 @@ using System.IO;
 using System.Text.Json;
 using osu.Game.Beatmaps;
 using osu.Game.Beatmaps.ControlPoints;
+using osu.Game.Beatmaps.Timing;
 using osu.Game.Rulesets.PacketRun.Objects;
 
 namespace osu.Game.Rulesets.PacketRun.Charts
@@ -40,6 +41,7 @@ namespace osu.Game.Rulesets.PacketRun.Charts
                 beatmap.ControlPointInfo.Add(timing.TimeMs, new TimingControlPoint
                 {
                     BeatLength = 60000 / timing.Bpm,
+                    TimeSignature = new TimeSignature(timing.Meter > 0 ? timing.Meter : 4),
                 });
             }
 

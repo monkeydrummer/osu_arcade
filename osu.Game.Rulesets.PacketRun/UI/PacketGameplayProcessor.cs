@@ -77,6 +77,29 @@ namespace osu.Game.Rulesets.PacketRun.UI
             }
         }
 
+        public bool IsRhythmPacketExpired(DrawablePacketHitObject drawable, double currentTime)
+        {
+            if (!rhythmPackets.TryGetValue(drawable, out var state))
+            {
+                return false;
+            }
+
+            if (state.ProgressIndex >= drawable.HitObject.Digits.Length)
+            {
+                return false;
+            }
+
+            double timeOffset = currentTime - drawable.HitObject.StartTime;
+            double missWindow = drawable.HitObject.HitWindows?.WindowFor(HitResult.Miss) ?? 188;
+
+            if (state.ProgressIndex == 0)
+            {
+                return timeOffset > missWindow;
+            }
+
+            return timeOffset > missWindow * 4;
+        }
+
         public void NotifyRhythmExpired(DrawablePacketHitObject drawable)
         {
             if (!rhythmPackets.Remove(drawable))
@@ -132,15 +155,18 @@ namespace osu.Game.Rulesets.PacketRun.UI
                 return;
             }
 
+            int completedDigit = targetProgress;
             targetProgress++;
 
             if (targetProgress >= hitObject.Digits.Length)
             {
+                target.FlashCorrectDigit(completedDigit);
                 completeQueuePacket(enteredCorrectly);
             }
             else
             {
                 target.RefreshProgress(targetProgress, enteredCorrectly);
+                target.FlashCorrectDigit(completedDigit);
             }
         }
 
@@ -187,17 +213,25 @@ namespace osu.Game.Rulesets.PacketRun.UI
                 }
 
                 state.FirstDigitResult = result;
+
+                if (result == HitResult.Miss)
+                {
+                    state.MissesInPacket++;
+                }
             }
 
+            int completedDigit = state.ProgressIndex;
             state.ProgressIndex++;
 
             if (state.ProgressIndex >= hitObject.Digits.Length)
             {
+                target.FlashCorrectDigit(completedDigit);
                 completeRhythmPacket(target, state);
             }
             else
             {
                 target.RefreshProgress(state.ProgressIndex, state.EnteredCorrectly);
+                target.FlashCorrectDigit(completedDigit);
             }
         }
 
@@ -207,6 +241,23 @@ namespace osu.Game.Rulesets.PacketRun.UI
             ScoreProcessor?.RegisterSignal(false);
             enteredCorrectly = false;
             target.FlashWrong();
+        }
+
+        private void completeRhythmPacket(DrawablePacketHitObject drawable, RhythmPacketState state)
+        {
+            if (!drawable.Result.HasResult)
+            {
+                drawable.ApplyCustomResult(getFinalResult(PacketGameplayMode.Rhythm, state.MissesInPacket, state.FirstDigitResult, state.EnteredCorrectly));
+            }
+
+            if (state.EnteredCorrectly && state.MissesInPacket == 0)
+            {
+                ScoreProcessor?.RegisterSignal(true);
+            }
+
+            rhythmPackets.Remove(drawable);
+            drawable.SetActive(false, state.ProgressIndex);
+            drawable.MarkComplete();
         }
 
         private void completeQueuePacket(bool enteredCorrectly)
@@ -227,23 +278,6 @@ namespace osu.Game.Rulesets.PacketRun.UI
             packetEnteredCorrectly = true;
             ActivePacketChanged?.Invoke();
             tryActivateNext();
-        }
-
-        private void completeRhythmPacket(DrawablePacketHitObject drawable, RhythmPacketState state)
-        {
-            if (!drawable.Result.HasResult)
-            {
-                drawable.ApplyCustomResult(getFinalResult(PacketGameplayMode.Rhythm, state.MissesInPacket, state.FirstDigitResult, state.EnteredCorrectly));
-            }
-
-            if (state.EnteredCorrectly && state.MissesInPacket == 0)
-            {
-                ScoreProcessor?.RegisterSignal(true);
-            }
-
-            rhythmPackets.Remove(drawable);
-            drawable.SetActive(false, state.ProgressIndex);
-            drawable.MarkComplete();
         }
 
         private HitResult getFinalResult(PacketGameplayMode mode, int missesInPacket, HitResult? firstDigitResult, bool enteredCorrectly)

@@ -12,6 +12,7 @@ using osu.Game.Rulesets.PacketRun.Objects;
 using osu.Game.Rulesets.PacketRun.UI;
 using osu.Game.Rulesets.PacketRun.UI.Components;
 using osu.Game.Rulesets.Scoring;
+using osuTK.Graphics;
 
 namespace osu.Game.Rulesets.PacketRun.Objects.Drawables
 {
@@ -79,6 +80,8 @@ namespace osu.Game.Rulesets.PacketRun.Objects.Drawables
 
         public void FlashWrong() => packetVisual?.FlashWrong();
 
+        public void FlashCorrectDigit(int digitIndex) => packetVisual?.FlashCorrectDigit(digitIndex);
+
         public void UpdateQueueLayout(float x, float targetY, int index)
         {
             X = x;
@@ -104,14 +107,14 @@ namespace osu.Game.Rulesets.PacketRun.Objects.Drawables
 
         protected override void CheckForResult(bool userTriggered, double timeOffset)
         {
-            var mode = HitObject.ModeOverride ?? processor.CurrentMode.Value;
+            var mode = HitObject.ModeOverride ?? processor.Beatmap.GetModeAt(HitObject.StartTime);
 
             if (mode == PacketGameplayMode.Queue)
             {
                 return;
             }
 
-            if (!userTriggered && timeOffset > (HitObject.HitWindows?.WindowFor(HitResult.Miss) ?? 200))
+            if (!userTriggered && processor.IsRhythmPacketExpired(this, Time.Current))
             {
                 processor.NotifyRhythmExpired(this);
             }
@@ -122,13 +125,26 @@ namespace osu.Game.Rulesets.PacketRun.Objects.Drawables
             switch (state)
             {
                 case ArmedState.Hit:
-                    this.FadeOut(300);
+                    if (isStrongHit(Result.Type))
+                    {
+                        this.FlashColour(new Color4(80, 255, 120, 255), 150);
+                        this.ScaleTo(1.08f).ScaleTo(1, 150).Then().FadeOut(300);
+                    }
+                    else
+                    {
+                        this.FadeOut(300);
+                    }
+
                     break;
 
                 case ArmedState.Miss:
+                    this.FlashColour(Color4.Red, 200);
                     this.FadeOut(300);
                     break;
             }
         }
+
+        private static bool isStrongHit(HitResult result) =>
+            result == HitResult.Perfect || result == HitResult.Great || result == HitResult.Good;
     }
 }

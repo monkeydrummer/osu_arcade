@@ -55,7 +55,7 @@ namespace osu.Game.Rulesets.PacketRun.Packets
 
             double beatLength = beatmap.ControlPointInfo.TimingPoints.First().BeatLength;
             double start = beatLength * 4;
-            double spacing = mode == PacketGameplayMode.Rhythm ? beatLength * 2 : beatLength;
+            double spacing = getPacketSpacing(beatLength, mode);
 
             for (int i = 0; i < packetCount; i++)
             {
@@ -71,5 +71,45 @@ namespace osu.Game.Rulesets.PacketRun.Packets
 
             return beatmap;
         }
+
+        /// <summary>
+        /// Calculates how many packets are required to cover a song of the given length.
+        /// </summary>
+        public static int CalculatePacketCountForSongLength(
+            double songLengthMs,
+            IEnumerable<(double timeMs, double bpm)> timingPoints,
+            PacketGameplayMode mode)
+        {
+            if (songLengthMs <= 0)
+            {
+                return 1;
+            }
+
+            double beatLength = resolveBeatLength(timingPoints);
+            double start = beatLength * 4;
+            double spacing = getPacketSpacing(beatLength, mode);
+
+            if (spacing <= 0 || songLengthMs <= start)
+            {
+                return 1;
+            }
+
+            return Math.Max(1, (int)Math.Floor((songLengthMs - start) / spacing) + 1);
+        }
+
+        private static double resolveBeatLength(IEnumerable<(double timeMs, double bpm)> timingPoints)
+        {
+            var firstTiming = timingPoints.FirstOrDefault();
+
+            if (firstTiming.bpm > 0)
+            {
+                return 60000 / firstTiming.bpm;
+            }
+
+            return 500;
+        }
+
+        private static double getPacketSpacing(double beatLength, PacketGameplayMode mode) =>
+            mode == PacketGameplayMode.Rhythm ? beatLength * 2 : beatLength;
     }
 }

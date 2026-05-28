@@ -78,33 +78,7 @@ namespace osu.Game.Rulesets.PacketRun.UI
         private void applyRhythmScrollPosition(DrawablePacketHitObject drawable, out bool visible)
         {
             double timeToHit = drawable.HitObject.StartTime - Time.Current;
-            float spawnX = DrawWidth * PacketRunRhythmLayout.SpawnX;
-            float visualHitX = DrawWidth * PacketRunRhythmLayout.HitLineX;
-            // Packet visuals are top-left anchored on the hit object origin, so offset the scroll target
-            // left by half a digit width so the first digit centers on the hit line at StartTime.
-            float hitX = visualHitX - DrawablePacket.DIGIT_SIZE / 2f;
-            float travel = spawnX - hitX;
-            double approachDuration = PacketRunRhythmLayout.ApproachDuration;
-
-            if (timeToHit > approachDuration)
-            {
-                drawable.X = spawnX;
-                visible = false;
-                return;
-            }
-
-            visible = true;
-
-            if (timeToHit > 0)
-            {
-                float progress = 1f - (float)(timeToHit / approachDuration);
-                drawable.X = spawnX - travel * progress;
-            }
-            else
-            {
-                float progress = (float)(-timeToHit / approachDuration);
-                drawable.X = hitX - travel * progress;
-            }
+            drawable.X = PacketRunRhythmLayout.GetScrollX(timeToHit, DrawWidth, out visible);
         }
     }
 }
