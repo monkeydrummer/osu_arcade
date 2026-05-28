@@ -24,6 +24,8 @@ using osu.Game.Beatmaps;
 
 using osu.Game.Rulesets.Mods;
 
+using osu.Game.Utils;
+
 using osu.Game.Rulesets.PacketRun.Objects;
 
 using osu.Game.Skinning;
@@ -207,8 +209,20 @@ namespace osu.Game.Rulesets.PacketRun.Charts
 
 
 
+        private const double fallback_audio_length_ms = 120_000;
+
         public static double GetAudioLengthMs(string songDirectory, string audioFileName, AudioManager audioManager, string? chartFilePath = null)
         {
+            if (PacketRunAudioPathResolver.TryResolve(audioFileName, songDirectory, chartFilePath, out string path) == PacketRunAudioResolveResult.FoundOnDisk)
+            {
+                double? tagLengthMs = tryGetLengthFromTags(path);
+
+                if (tagLengthMs.HasValue)
+                {
+                    return tagLengthMs.Value;
+                }
+            }
+
             var beatmap = new PacketRunBeatmap
             {
                 BeatmapInfo = new BeatmapInfo
@@ -219,7 +233,39 @@ namespace osu.Game.Rulesets.PacketRun.Charts
 
             var working = new PacketRunWorkingBeatmap(beatmap, songDirectory, audioFileName, audioManager, chartFilePath);
             working.LoadTrack();
-            return working.Track.Length;
+
+            Track track = working.Track;
+
+            if (!track.IsLoaded)
+            {
+                track.Seek(track.CurrentTime);
+            }
+
+            if (track.Length > 1000)
+            {
+                return track.Length;
+            }
+
+            return fallback_audio_length_ms;
+        }
+
+        private static double? tryGetLengthFromTags(string path)
+        {
+            try
+            {
+                using var tagFile = TagLibUtils.GetTagLibFile(path);
+                double lengthMs = tagFile.Properties.Duration.TotalMilliseconds;
+
+                if (lengthMs > 1000)
+                {
+                    return lengthMs;
+                }
+            }
+            catch
+            {
+            }
+
+            return null;
         }
 
         private Track? loadTrackFromFile(string path)
